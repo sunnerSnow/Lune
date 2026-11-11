@@ -1,0 +1,452 @@
+@import "tailwindcss";
+
+/*
+ * Luné 視覺：方案 A「霧藍星球」（提案稿在 design/proposals.html）。
+ * - 霧藍底＋白字；文字區底色不淺於 #477A92（白字 4.7:1）。淺霧藍只用在裝飾。
+ * - 漸層光球表示週期與 Profile；狀態一律搭配外框樣式／文字／圖例，不只靠顏色。
+ * - 元件只用這裡的 token 與 class，不在元件裡寫死色碼。
+ */
+
+@theme {
+  --font-en: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-tc: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+
+  --color-sky-deep: #3f6f86;
+  --color-sky: #477a92;
+  --color-sky-mid: #4e849c;
+  --color-mist: #96c0d2;
+  --color-ink: #ffffff;
+  --color-ink-soft: rgb(255 255 255 / 0.88);
+  --color-line: rgb(255 255 255 / 0.3);
+  --color-glass: rgb(255 255 255 / 0.12);
+  --color-glass-line: rgb(255 255 255 / 0.3);
+  --color-orb-ink: #2b2a33;
+  --color-blush: #f6b7c4;
+  --color-alert: #ffe3e8;
+
+  --radius-glass: 30px;
+  --radius-sheet: 34px;
+
+  --ease-soft: cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+/* 顆粒雜訊（SVG feTurbulence），疊在整個畫面上 */
+:root {
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-sky);
+}
+
+body {
+  color: var(--color-ink);
+  font-family: var(--font-tc);
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(120% 50% at 15% 0%, rgb(150 192 210 / 0.5), transparent 62%),
+    linear-gradient(180deg, var(--color-sky-mid) 0%, var(--color-sky) 45%, var(--color-sky-deep) 100%);
+  background-attachment: fixed;
+}
+
+/* 織紋與顆粒：固定在視窗上，不擋點擊 */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 5px);
+}
+body::after {
+  z-index: 60;
+  background-image: var(--grain);
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+}
+
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+@layer components {
+  .font-en {
+    font-family: var(--font-en);
+  }
+
+  /* 標題：寬字距英文＋中文小標 */
+  .ttl-en {
+    font-family: var(--font-en);
+    font-weight: 300;
+    font-size: 24px;
+    letter-spacing: 0.2em;
+    line-height: 1.2;
+  }
+  .ttl-tc {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+  }
+
+  /* 玻璃面板 */
+  .glass {
+    background: var(--color-glass);
+    border: 1px solid var(--color-glass-line);
+    border-radius: var(--radius-glass);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  /* 深色玻璃：放在淺色裝飾上方時，確保白字對比 */
+  .glass-deep {
+    background: rgb(40 80 100 / 0.42);
+    border: 1px solid var(--color-glass-line);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+
+  /* 手繪感橢圓外框按鈕（帶微光） */
+  .oval {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #fff;
+    border: 1.5px solid currentColor;
+    border-radius: 52% 48% 53% 47% / 56% 50% 50% 44%;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-align: center;
+    box-shadow:
+      0 0 12px rgb(255 255 255 / 0.5),
+      inset 0 0 14px rgb(255 255 255 / 0.28);
+    transition:
+      box-shadow 0.25s var(--ease-soft),
+      background-color 0.25s var(--ease-soft),
+      transform 0.2s var(--ease-soft);
+    cursor: pointer;
+  }
+  .oval:hover {
+    background-color: rgb(255 255 255 / 0.08);
+    box-shadow:
+      0 0 18px rgb(255 255 255 / 0.65),
+      inset 0 0 16px rgb(255 255 255 / 0.35);
+  }
+  .oval:active {
+    transform: scale(0.97);
+  }
+  .oval:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  /* 實心版（主要動作：白底深字） */
+  .oval-solid {
+    background: #fff;
+    color: var(--color-sky-deep);
+    border-color: #fff;
+  }
+  .oval-solid:hover {
+    background: #fff;
+  }
+
+  /* 細線圓形按鈕（箭頭、月份切換、關閉） */
+  .circle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.75);
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    color: #fff;
+    transition: background-color 0.2s var(--ease-soft);
+  }
+  .circle-btn:hover {
+    background: rgb(255 255 255 / 0.12);
+  }
+  .circle-btn.sm {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* 選項膠囊（症狀、心情） */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    transition:
+      background-color 0.2s var(--ease-soft),
+      box-shadow 0.2s var(--ease-soft);
+    cursor: pointer;
+  }
+  .chip:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .chip.solid,
+  .chip[aria-pressed="true"],
+  .chip[aria-checked="true"],
+  .chip[aria-selected="true"] {
+    background: #fff;
+    color: #23495b;
+    border-color: #fff;
+    font-weight: 500;
+    box-shadow: 0 0 10px rgb(255 255 255 / 0.45);
+  }
+  .chip.dashed {
+    border-style: dashed;
+  }
+
+  /* 經血量：四顆橢圓 */
+  .flow-opt {
+    height: 60px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 52% 48% 53% 47% / 56% 50% 50% 44%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.2s var(--ease-soft),
+      box-shadow 0.2s var(--ease-soft);
+  }
+  .flow-opt[aria-checked="true"] {
+    border-color: #fff;
+    background: rgb(255 255 255 / 0.95);
+    color: #23495b;
+    font-weight: 500;
+    box-shadow: 0 0 12px rgb(255 255 255 / 0.5);
+  }
+
+  /* 表單欄位：底線式 */
+  .field-input {
+    width: 100%;
+    min-height: 44px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-line);
+    color: #fff;
+    font-size: 16px;
+    padding: 8px 2px;
+    letter-spacing: 0.04em;
+  }
+  .field-input::placeholder {
+    color: rgb(255 255 255 / 0.6);
+  }
+  .field-input:focus-visible {
+    outline: none;
+    border-bottom-color: #fff;
+    box-shadow: 0 1px 0 #fff;
+  }
+  .field-input[aria-invalid="true"] {
+    border-bottom-color: var(--color-alert);
+  }
+  .field-label {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--color-ink-soft);
+  }
+  .field-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgb(110 20 45 / 0.45);
+    color: var(--color-alert);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+
+  /* 光球 */
+  .orb {
+    border-radius: 999px;
+    display: block;
+    flex: none;
+  }
+  .orb-soft {
+    -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 71%);
+    mask-image: radial-gradient(circle, #000 60%, transparent 71%);
+  }
+  .orb-glow {
+    box-shadow:
+      inset -8px -12px 26px rgb(255 255 255 / 0.28),
+      inset 6px 8px 18px rgb(255 255 255 / 0.18),
+      0 0 28px rgb(255 255 255 / 0.22);
+  }
+  .orb-rose {
+    background:
+      radial-gradient(circle at 70% 30%, #e2506e 0, transparent 44%),
+      radial-gradient(circle at 28% 72%, #f4b49e 0, transparent 52%),
+      radial-gradient(circle at 34% 28%, #ea9cc8 0, transparent 56%),
+      #ee8da2;
+  }
+  .orb-lavender {
+    background:
+      radial-gradient(circle at 40% 62%, #c799dd 0, transparent 40%),
+      radial-gradient(circle at 70% 30%, #86c1e6 0, transparent 52%),
+      radial-gradient(circle at 25% 25%, #a9b3ec 0, transparent 55%),
+      #98ade3;
+  }
+  .orb-peach {
+    background:
+      radial-gradient(circle at 65% 35%, #f0896c 0, transparent 45%),
+      radial-gradient(circle at 30% 70%, #f9d4a8 0, transparent 55%),
+      radial-gradient(circle at 30% 28%, #f6b4b9 0, transparent 55%),
+      #f3a98f;
+  }
+  .orb-sage {
+    background:
+      radial-gradient(circle at 62% 46%, #9fddb4 0, transparent 40%),
+      radial-gradient(circle at 30% 30%, #f4f2c2 0, transparent 55%),
+      radial-gradient(circle at 70% 80%, #e1e07f 0, transparent 55%),
+      #e8e89c;
+  }
+  .orb-sky {
+    background:
+      radial-gradient(circle at 65% 35%, #7fd0e8 0, transparent 45%),
+      radial-gradient(circle at 30% 70%, #b9e6e0 0, transparent 55%),
+      radial-gradient(circle at 30% 28%, #a3b8f0 0, transparent 55%),
+      #9cccea;
+  }
+  .orb-sand {
+    background:
+      radial-gradient(circle at 65% 35%, #e9c27e 0, transparent 45%),
+      radial-gradient(circle at 30% 70%, #f6e7c4 0, transparent 55%),
+      radial-gradient(circle at 30% 28%, #f2c9b4 0, transparent 55%),
+      #ecd3a3;
+  }
+
+  /* 預測的光球：虛線圈＋淡粉 */
+  .orb-predicted {
+    border: 1.5px dashed rgb(255 255 255 / 0.95);
+    background: rgb(246 183 196 / 0.22);
+  }
+
+  /* 日期上的標記（ 跟光球 ）*/
+  .tag-dashed {
+    display: inline-block;
+    border: 1px dashed rgb(255 255 255 / 0.85);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    line-height: 1.6;
+  }
+
+  .sep-dash {
+    display: block;
+    width: 12px;
+    height: 1px;
+    background: var(--color-ink-soft);
+  }
+
+  /* 頁首：往下漸層淡出＋輕微模糊 */
+  .topbar-fade {
+    position: relative;
+  }
+  .topbar-fade::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -18px;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(63 111 134 / 0.8), rgb(63 111 134 / 0));
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    -webkit-mask-image: linear-gradient(#000 55%, transparent);
+    mask-image: linear-gradient(#000 55%, transparent);
+  }
+  /* 桌面：頁首在右欄，漸層往左延伸到側欄底下，避免側欄頂端看起來比較亮 */
+  @media (min-width: 64rem) {
+    .topbar-fade::before {
+      left: -16rem;
+    }
+  }
+
+  .logo {
+    font-family: var(--font-en);
+    font-weight: 300;
+    font-size: 24px;
+    letter-spacing: 0.16em;
+    line-height: 1;
+  }
+}
+
+/* 光球緩慢漂浮；系統要求減少動態時停用 */
+@keyframes lune-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+@keyframes lune-rise {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes lune-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-float {
+  animation: lune-float 9s ease-in-out infinite;
+}
+@utility animate-float-slow {
+  animation: lune-float 13s ease-in-out infinite;
+}
+@utility animate-rise {
+  animation: lune-rise 0.42s var(--ease-soft) both;
+}
+@utility animate-fade {
+  animation: lune-fade 0.3s ease-out both;
+}
+
+/* 原生 <dialog> 的背景 */
+dialog.sheet::backdrop {
+  background: rgb(30 60 76 / 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

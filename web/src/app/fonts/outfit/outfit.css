@@ -1,0 +1,9 @@
+/* 由 scripts/subset-font.py 產生，不要手動修改。Outfit：SIL Open Font License 1.1（見 OFL.txt） */
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./outfit.woff2") format("woff2");
+  unicode-range: U+20-7E, U+A0-AC, U+AE-FF, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2190, U+2192, U+2212, U+2713;
+}

@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luné 視覺提案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============ 頁面（提案說明用，不是 App 的一部分） ============ */
+  :root {
+    --font-en: "Outfit", ui-sans-serif, sans-serif;
+    --font-tc: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #ECEEF0; color: #2A2C2E; font-family: var(--font-tc); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1640px; margin: 0 auto; padding: 48px 28px 96px; }
+  .page h1 { font-family: var(--font-en); font-weight: 300; font-size: 40px; letter-spacing: .14em; margin: 0; }
+  .page h1 small { display: block; font-family: var(--font-tc); font-size: 15px; letter-spacing: .2em; font-weight: 500; margin-top: 6px; color: #555; }
+  .lead { max-width: 920px; line-height: 1.9; font-size: 15px; color: #3c3f42; }
+  .lead ul { margin: 6px 0 0; padding-left: 20px; }
+  .proposal { margin-top: 72px; }
+  .proposal-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+  .proposal-head h2 { font-family: var(--font-en); font-weight: 300; font-size: 30px; letter-spacing: .12em; margin: 0; }
+  .proposal-head h2 b { font-family: var(--font-tc); font-weight: 500; letter-spacing: .08em; }
+  .proposal-head p { margin: 0; color: #555; font-size: 14px; }
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 28px; margin: 18px 0 26px; font-size: 13.5px; line-height: 1.8; color: #3c3f42; max-width: 1180px; }
+  .notes h3 { font-size: 13px; letter-spacing: .14em; margin: 0 0 4px; color: #222; }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+  .sw { display: flex; align-items: center; gap: 8px; font-size: 12px; background: #fff; border-radius: 999px; padding: 4px 12px 4px 4px; color: #444; }
+  .sw i { width: 22px; height: 22px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .frames { display: flex; flex-wrap: wrap; gap: 36px 32px; }
+  .frame-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .frame-label { font-size: 13px; color: #4a4d50; letter-spacing: .12em; }
+  .frame-label b { font-family: var(--font-en); font-weight: 500; margin-right: 8px; color: #222; }
+  .common { margin-top: 80px; max-width: 1180px; font-size: 14px; line-height: 1.9; color: #3c3f42; }
+  .common h2 { font-family: var(--font-en); font-weight: 300; letter-spacing: .12em; font-size: 26px; margin: 0 0 8px; color: #222; }
+
+  /* ============ 手機框 ============ */
+  .phone {
+    width: 360px; height: 760px; border-radius: 46px; overflow: hidden; position: relative; isolation: isolate;
+    box-shadow: 0 0 0 9px #1C1E21, 0 0 0 10px #3a3d41, 0 40px 70px -24px rgba(20, 30, 40, .45);
+    font-size: 14px; line-height: 1.6;
+  }
+  .phone * { -webkit-tap-highlight-color: transparent; }
+  .scroll { position: absolute; inset: 0; overflow: hidden; }
+  .en { font-family: var(--font-en); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  svg.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  svg.ic.sm { width: 16px; height: 16px; }
+
+  /* 光球（漸層、柔邊） */
+  .orb { border-radius: 50%; position: absolute; }
+  .orb.soft { -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 71%); mask-image: radial-gradient(circle, #000 60%, transparent 71%); }
+  .orb.glow { box-shadow: inset -8px -12px 26px rgba(255,255,255,.28), inset 6px 8px 18px rgba(255,255,255,.18), 0 0 28px rgba(255,255,255,.22); }
+  .orb-rose {
+    background:
+      radial-gradient(circle at 70% 30%, #E2506E 0, transparent 44%),
+      radial-gradient(circle at 28% 72%, #F4B49E 0, transparent 52%),
+      radial-gradient(circle at 34% 28%, #EA9CC8 0, transparent 56%),
+      #EE8DA2;
+  }
+  .orb-lemon {
+    background:
+      radial-gradient(circle at 62% 46%, #9FDDB4 0, transparent 40%),
+      radial-gradient(circle at 30% 30%, #F4F2C2 0, transparent 55%),
+      radial-gradient(circle at 70% 80%, #E1E07F 0, transparent 55%),
+      #E8E89C;
+  }
+  .orb-lav {
+    background:
+      radial-gradient(circle at 40% 62%, #C799DD 0, transparent 40%),
+      radial-gradient(circle at 70% 30%, #86C1E6 0, transparent 52%),
+      radial-gradient(circle at 25% 25%, #A9B3EC 0, transparent 55%),
+      #98ADE3;
+  }
+  .orb-mini { width: 22px; height: 22px; position: relative; display: inline-block; flex: none; }
+
+  /* 手繪感橢圓按鈕 */
+  .oval {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    border: 1.5px solid currentColor; border-radius: 52% 48% 53% 47% / 56% 50% 50% 44%;
+    font-weight: 500; letter-spacing: .14em; text-align: center; position: absolute; cursor: pointer;
+  }
+  .circle-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid currentColor; display: inline-grid; place-items: center; flex: none; opacity: .9; }
+  .circle-btn svg { width: 16px; height: 16px; }
+
+  /* 標題（寬字距英文＋中文小標） */
+  .ttl { display: flex; align-items: baseline; gap: 10px; }
+  .ttl .en { font-weight: 300; font-size: 24px; letter-spacing: .2em; }
+  .ttl .tc { font-size: 12px; letter-spacing: .22em; font-weight: 500; }
+
+  /* ===================== 方案 A：霧藍星球 ===================== */
+  .ta {
+    --ink: #FFFFFF; --ink-2: rgba(255,255,255,.88); --line: rgba(255,255,255,.32); --glass: rgba(255,255,255,.12); --glass-line: rgba(255,255,255,.3);
+    color: var(--ink);
+    background:
+      radial-gradient(120% 50% at 15% 0%, rgba(150,192,210,.55), transparent 62%),
+      linear-gradient(180deg, #4E849C 0%, #477A92 45%, #3F6F86 100%);
+  }
+  .ta::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 5px); }
+  .ta::after { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; background-image: var(--grain); mix-blend-mode: soft-light; opacity: .55; }
+  .ta .scroll > * { position: relative; z-index: 1; }
+  .ta .topbar { position: absolute; top: 0; left: 0; right: 0; height: 74px; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 0; z-index: 20; }
+  .ta .topbar::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, rgba(63,111,134,.75), rgba(63,111,134,0));
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+  .ta .logo { font-family: var(--font-en); font-weight: 300; font-size: 24px; letter-spacing: .16em; }
+  .ta .profile { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; border-radius: 999px; border: 1px solid var(--glass-line); background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 13px; letter-spacing: .1em; }
+  .ta .glass { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 30px; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .ta .oval { color: #fff; box-shadow: 0 0 12px rgba(255,255,255,.5), inset 0 0 14px rgba(255,255,255,.28); }
+  .ta .nav { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 62px; display: flex; justify-content: space-around; align-items: center; border-radius: 32px; z-index: 25;
+    background: rgba(40,80,100,.38); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  .ta .nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; letter-spacing: .14em; color: var(--ink-2); text-decoration: none; position: relative; min-width: 56px; padding-top: 4px; }
+  .ta .nav a[aria-current] { color: #fff; font-weight: 500; }
+  .ta .nav a[aria-current]::before { content: ""; position: absolute; top: -4px; width: 6px; height: 6px; border-radius: 50%; background: #F6B7C4; box-shadow: 0 0 8px #F6B7C4; }
+  .ta .sep-dash { display: block; width: 12px; height: 1px; background: var(--ink-2); margin: 8px 0; }
+  .ta .chip { display: inline-flex; align-items: center; gap: 4px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; letter-spacing: .08em; color: var(--ink); }
+  .ta .chip.on { background: #fff; color: #23495B; border-color: #fff; font-weight: 500; box-shadow: 0 0 10px rgba(255,255,255,.45); }
+
+  /* A：首頁 */
+  .a-home .hero { position: absolute; top: -18px; left: 0; right: 0; height: 420px; }
+  .a-home .hero .big { left: -64px; top: 92px; width: 300px; height: 300px; }
+  .a-home .day { position: absolute; left: 30px; top: 168px; z-index: 3; }
+  .a-home .day .lbl { font-family: var(--font-en); font-size: 12px; letter-spacing: .32em; font-weight: 400; color: #2B2A33; }
+  .a-home .day .num { font-family: var(--font-en); font-weight: 200; font-size: 104px; line-height: .9; letter-spacing: .02em; color: #2B2A33; }
+  .a-home .day .cap { font-size: 13px; letter-spacing: .18em; font-weight: 500; color: #2B2A33; margin-top: 8px; }
+  .a-home .sat { position: absolute; z-index: 3; font-size: 12px; letter-spacing: .08em; line-height: 1.55; }
+  .a-home .sat b { display: block; font-family: var(--font-en); font-weight: 300; font-size: 22px; letter-spacing: .06em; }
+  .a-home .tag { display: inline-block; border: 1px dashed rgba(255,255,255,.85); border-radius: 999px; padding: 0 8px; font-size: 11px; letter-spacing: .14em; margin-left: 4px; }
+  .a-home .ovals { position: absolute; left: 0; right: 0; top: 404px; height: 150px; }
+  .a-home .recent { position: absolute; left: 20px; right: 20px; top: 548px; font-size: 13px; }
+  .a-home .recent .row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-top: 1px solid var(--line); }
+  .a-home .disclaim { position: absolute; left: 20px; right: 20px; top: 626px; margin: 0; font-size: 11px; letter-spacing: .06em; color: var(--ink-2); }
+
+  /* A：日曆 */
+  .a-cal .head { position: absolute; top: 80px; left: 20px; right: 20px; }
+  .a-cal .month { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+  .a-cal .month .m { font-family: var(--font-en); font-weight: 300; font-size: 22px; letter-spacing: .2em; }
+  .a-cal .month .today-pill { font-size: 12px; letter-spacing: .14em; border: 1px solid var(--line); padding: 4px 12px; border-radius: 999px; }
+  .a-cal .grid { position: absolute; top: 168px; left: 14px; right: 14px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; position: relative; }
+  .cal-grid .wd { text-align: center; font-size: 11px; letter-spacing: .1em; padding-bottom: 6px; }
+  .cal-grid .d { height: 42px; display: grid; place-items: center; position: relative; font-family: var(--font-en); font-size: 15px; font-weight: 400; z-index: 1; }
+  .cal-grid .d span { position: relative; z-index: 2; }
+  .cal-grid .d.out { opacity: .45; }
+  .cal-grid .d .mk { position: absolute; width: 36px; height: 36px; border-radius: 50%; top: 3px; left: 50%; transform: translateX(-50%); z-index: 1; }
+  .cal-grid .d .dot { position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; z-index: 2; }
+  .cal-grid .thread { position: absolute; height: 0; border-top: 1px solid; z-index: 0; }
+  .ta .cal-grid .d { height: 40px; }
+  .ta .cal-grid .d .mk { top: 2px; }
+  .ta .cal-grid .d .dot { background: #fff; }
+  .ta .cal-grid .d.period span { color: #2B2A33; font-weight: 500; }
+  .ta .cal-grid .d.pred .mk { border: 1.5px dashed rgba(255,255,255,.95); background: rgba(246,183,196,.22); }
+  .ta .cal-grid .d.today .mk { border: 1.5px solid #fff; box-shadow: 0 0 10px rgba(255,255,255,.6); }
+  .ta .cal-grid .thread { border-color: rgba(255,255,255,.7); }
+  .ta .cal-grid .thread.dash { border-top-style: dashed; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11.5px; letter-spacing: .06em; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; position: relative; }
+  .a-cal .legend { position: absolute; top: 410px; left: 20px; right: 20px; }
+  .a-cal .detail { position: absolute; left: 14px; right: 14px; top: 440px; padding: 14px 18px 12px; }
+  .a-cal .detail .date { font-family: var(--font-en); font-size: 12px; letter-spacing: .16em; }
+  .a-cal .detail h4 { margin: 0; font-size: 16px; font-weight: 500; letter-spacing: .1em; }
+  .a-cal .sep-dash { margin: 6px 0; }
+  .a-cal .detail dl { margin: 0; display: grid; grid-template-columns: 50px 1fr 38px 1fr; gap: 2px 8px; font-size: 13px; }
+  .a-cal .detail dt { color: var(--ink-2); letter-spacing: .1em; }
+  .a-cal .detail dd { margin: 0; }
+  .a-cal .detail .act { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+
+  /* A：每日紀錄 sheet */
+  .a-log .behind { position: absolute; inset: 0; filter: blur(6px); opacity: .7; }
+  .a-log .scrim { position: absolute; inset: 0; background: rgba(30,60,76,.35); z-index: 2; }
+  .a-log .sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 96px; z-index: 5; border-radius: 34px 34px 0 0; padding: 12px 20px 24px;
+    background: rgba(78,128,152,.72); border: 1px solid var(--glass-line); border-bottom: 0; -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+  .a-log .handle { width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.6); margin: 0 auto 12px; }
+  .a-log .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+  .a-log .sheet-head h3 { margin: 0; font-size: 18px; font-weight: 500; letter-spacing: .14em; }
+  .a-log .date-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; letter-spacing: .08em; border-bottom: 1px solid var(--ink-2); padding-bottom: 1px; }
+  .a-log .fs { margin-top: 14px; }
+  .a-log .fs > p { margin: 0 0 7px; font-size: 12px; letter-spacing: .2em; color: var(--ink-2); }
+  .a-log .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .a-log .flows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .a-log .flow { height: 58px; border: 1.5px solid var(--line); border-radius: 52% 48% 53% 47% / 56% 50% 50% 44%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; letter-spacing: .1em; }
+  .a-log .flow .drops { display: flex; gap: 1px; height: 12px; }
+  .a-log .flow .drops svg { width: 10px; height: 12px; fill: currentColor; stroke: none; }
+  .a-log .flow.on { border-color: #fff; background: rgba(255,255,255,.95); color: #23495B; font-weight: 500; box-shadow: 0 0 12px rgba(255,255,255,.5); }
+  .a-log .note { border-bottom: 1px solid var(--line); padding: 6px 0; font-size: 13px; color: var(--ink-2); }
+  .a-log .save { position: relative; display: flex; justify-content: center; margin-top: 18px; }
+  .a-log .save .oval { position: static; width: 190px; height: 64px; font-size: 16px; }
+  .a-log .hint { text-align: center; font-size: 11px; letter-spacing: .06em; color: var(--ink-2); margin-top: 8px; }
+
+  /* A：分析 */
+  .a-ana .head { position: absolute; top: 80px; left: 20px; right: 20px; }
+  .a-ana .stats { position: absolute; top: 128px; left: 14px; right: 14px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 14px 6px; }
+  .a-ana .stat { text-align: center; position: relative; }
+  .a-ana .stat + .stat::before { content: ""; position: absolute; left: 0; top: 10%; bottom: 10%; border-left: 1px solid var(--line); }
+  .a-ana .stat b { display: block; font-family: var(--font-en); font-weight: 200; font-size: 40px; line-height: 1.05; }
+  .a-ana .stat b small { font-family: var(--font-tc); font-size: 12px; font-weight: 500; margin-left: 2px; letter-spacing: .1em; }
+  .a-ana .stat p { margin: 2px 0 0; font-size: 11.5px; letter-spacing: .14em; color: var(--ink-2); }
+  .a-ana .const-title { position: absolute; top: 246px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: .18em; color: var(--ink-2); }
+  .a-ana .const { position: absolute; top: 270px; left: 16px; width: 328px; height: 390px; }
+  .a-ana .const .lab { position: absolute; font-size: 12px; letter-spacing: .06em; line-height: 1.4; }
+  .a-ana .const .lab b { display: block; font-family: var(--font-en); font-weight: 400; font-size: 15px; letter-spacing: .08em; }
+  .a-ana .const .len { position: absolute; transform: translate(-50%, -50%); font-family: var(--font-en); font-size: 12px; letter-spacing: .08em; padding: 1px 9px; border-radius: 999px; background: rgba(63,111,134,.85); border: 1px solid var(--glass-line); white-space: nowrap; }
+  .a-ana .const .len.pred { border-style: dashed; }
+
+  /* ===================== 方案 B：奶油章節 ===================== */
+  .tb {
+    --ink: #3D3533; --ink-2: #6E6461; --line: rgba(61,53,51,.16); --accent: #A8405F;
+    color: var(--ink); background: #FBF7F1;
+  }
+  .tb::after { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; background-image: var(--grain); mix-blend-mode: soft-light; opacity: .7; }
+  .tb .scroll > * { position: relative; z-index: 1; }
+  .tb .topbar { position: absolute; top: 0; left: 0; right: 0; height: 66px; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 0; z-index: 20; }
+  .tb .topbar::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(251,247,241,.95), rgba(251,247,241,0)); -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+  .tb .logo { font-family: var(--font-en); font-weight: 300; font-size: 22px; letter-spacing: .18em; }
+  .tb .profile { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .14em; }
+  .tb .oval { color: var(--ink); }
+  .tb .circle-btn { color: var(--ink); }
+  .tb .nav { position: absolute; left: 0; right: 0; bottom: 0; height: 70px; display: flex; justify-content: center; align-items: center; gap: 22px; z-index: 25; background: rgba(251,247,241,.94); border-top: 1px solid var(--line); font-size: 13px; letter-spacing: .2em; }
+  .tb .nav a { color: var(--ink-2); text-decoration: none; position: relative; padding: 10px 2px; }
+  .tb .nav a[aria-current] { color: var(--ink); font-weight: 700; }
+  .tb .nav a[aria-current]::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #F4B49E, #E2506E); }
+  .tb .nav .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink-2); }
+  .tb .chip { display: inline-flex; align-items: center; gap: 4px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; letter-spacing: .08em; background: #fff; }
+  .tb .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+  .mesh-rose { background: radial-gradient(70% 80% at 92% 0%, #E77A90 0%, transparent 62%), radial-gradient(70% 90% at 0% 45%, #F8DCD8 0%, transparent 70%), radial-gradient(80% 70% at 70% 105%, #F3BCA6 0%, transparent 70%), #F2B4BC; }
+  .mesh-lav { background: radial-gradient(70% 90% at 100% 20%, #A9C4EC 0%, transparent 62%), radial-gradient(70% 80% at 0% 0%, #C7BCEB 0%, transparent 65%), radial-gradient(90% 70% at 40% 110%, #DDE5F6 0%, transparent 70%), #C4C6EC; }
+  .mesh-sage { background: radial-gradient(70% 90% at 100% 0%, #B9DCC2 0%, transparent 62%), radial-gradient(80% 80% at 0% 100%, #EEF0C8 0%, transparent 70%), #D4E6CC; }
+  .tb .band { position: relative; padding: 14px 22px 0; overflow: hidden; }
+  .tb .band .no { font-family: var(--font-en); font-weight: 200; font-size: 30px; letter-spacing: .04em; line-height: 1; }
+  .tb .band .no small { font-size: 12px; font-weight: 400; margin-left: 3px; letter-spacing: .1em; }
+  .tb .band .kicker { font-size: 11px; letter-spacing: .3em; margin-top: 8px; font-weight: 500; }
+  .tb .band .kicker .en { letter-spacing: .3em; margin-right: 6px; }
+
+  /* B：首頁 */
+  .b-home .b1 { position: absolute; top: 0; left: 0; right: 0; height: 268px; padding-top: 70px; }
+  .b-home .b1 .big { font-weight: 500; font-size: 15px; letter-spacing: .18em; margin-top: 4px; }
+  .b-home .b1 .big b { font-family: var(--font-en); font-weight: 200; font-size: 76px; line-height: 1; letter-spacing: 0; margin: 0 4px; }
+  .b-home .b1 .sub { font-size: 12.5px; letter-spacing: .08em; margin-top: 4px; }
+  .b-home .b2 { position: absolute; top: 268px; left: 0; right: 0; height: 176px; }
+  .b-home .b2 .range { font-family: var(--font-en); font-weight: 300; font-size: 38px; letter-spacing: .06em; line-height: 1.15; margin-top: 4px; }
+  .b-home .b2 .sub { font-size: 12.5px; letter-spacing: .08em; }
+  .b-home .tag { display: inline-block; border: 1px dashed var(--ink); border-radius: 999px; padding: 0 8px; font-size: 11px; letter-spacing: .14em; margin-left: 6px; }
+  .b-home .b3 { position: absolute; top: 444px; left: 0; right: 0; height: 246px; }
+  .b-home .b3 .ovals { position: absolute; left: 0; right: 0; top: 76px; height: 150px; }
+  .b-home .b3 .disclaim { position: absolute; left: 22px; right: 22px; bottom: 6px; font-size: 11px; letter-spacing: .04em; color: #4C5547; }
+
+  /* B：日曆 */
+  .b-cal .head { position: absolute; top: 70px; left: 20px; right: 20px; }
+  .b-cal .month { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .b-cal .month .m { font-family: var(--font-en); font-weight: 300; font-size: 22px; letter-spacing: .16em; }
+  .b-cal .month .m small { font-family: var(--font-tc); font-size: 12px; letter-spacing: .16em; margin-left: 6px; }
+  .b-cal .grid { position: absolute; top: 166px; left: 14px; right: 14px; }
+  .tb .cal-grid { row-gap: 0; }
+  .tb .cal-grid .d { border-top: 1px solid var(--line); height: 46px; }
+  .tb .cal-grid .d .mk { top: 5px; }
+  .tb .cal-grid .d .dot { background: var(--ink); }
+  .tb .cal-grid .d.period span { color: #2F2A29; font-weight: 500; }
+  .tb .cal-grid .d.pred .mk { border: 1.5px dashed var(--accent); background: repeating-linear-gradient(135deg, rgba(168,64,95,.22) 0 2px, transparent 2px 6px); }
+  .tb .cal-grid .d.today .mk { border: 1.5px solid var(--ink); }
+  .tb .cal-grid .thread { border-color: rgba(168,64,95,.55); }
+  .tb .cal-grid .thread.dash { border-top-style: dashed; }
+  .b-cal .legend { position: absolute; top: 452px; left: 20px; right: 20px; color: var(--ink-2); }
+  .b-cal .detail { position: absolute; left: 20px; right: 20px; top: 494px; }
+  .b-cal .detail .date { font-family: var(--font-en); font-size: 12px; letter-spacing: .12em; color: var(--ink-2); }
+  .b-cal .detail h4 { margin: 2px 0 0; font-size: 17px; font-weight: 500; letter-spacing: .12em; }
+  .b-cal .detail .rows { margin-top: 6px; font-size: 13px; }
+  .b-cal .detail .row { display: flex; gap: 10px; padding: 3px 0; }
+  .b-cal .detail .row span:first-child { color: var(--ink-2); width: 46px; letter-spacing: .1em; flex: none; }
+  .b-cal .detail .act { position: absolute; right: 0; top: 4px; }
+
+  /* B：每日紀錄（全螢幕 sheet，編號段落） */
+  .b-log .sheet { position: absolute; inset: 0; padding: 18px 20px 20px; background: #FBF7F1; }
+  .b-log .sheet-head { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; }
+  .b-log .sheet-head h3 { margin: 0; font-size: 18px; font-weight: 500; letter-spacing: .16em; }
+  .b-log .date-chip { font-size: 13px; letter-spacing: .08em; display: inline-flex; align-items: center; gap: 4px; }
+  .b-log .fs { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
+  .b-log .fs > p { margin: 0 0 8px; font-size: 12px; letter-spacing: .2em; color: var(--ink-2); display: flex; gap: 8px; align-items: baseline; }
+  .b-log .fs > p .en { font-weight: 300; font-size: 15px; color: var(--ink); letter-spacing: .06em; }
+  .b-log .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .b-log .flows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .b-log .flow { height: 56px; border: 1.5px solid var(--line); background: #fff; border-radius: 52% 48% 53% 47% / 56% 50% 50% 44%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; letter-spacing: .1em; }
+  .b-log .flow .drops { display: flex; gap: 1px; height: 12px; color: var(--accent); }
+  .b-log .flow .drops svg { width: 10px; height: 12px; fill: currentColor; stroke: none; }
+  .b-log .flow.on { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 500; }
+  .b-log .flow.on .drops { color: #fff; }
+  .b-log .note { border-bottom: 1px solid var(--line); padding: 6px 0; font-size: 13px; color: var(--ink-2); }
+  .b-log .save { display: flex; justify-content: center; margin-top: 16px; }
+  .b-log .save .oval { position: static; width: 200px; height: 62px; font-size: 16px; background: var(--ink); color: #FBF7F1; border-color: var(--ink); }
+
+  /* B：分析（錯位排列的不規則圓形） */
+  .b-ana .head { position: absolute; top: 70px; left: 20px; right: 20px; }
+  .b-ana .blobs { position: absolute; top: 112px; left: 0; right: 0; height: 300px; }
+  .b-ana .blob { position: absolute; width: 150px; height: 140px; border-radius: 46% 54% 52% 48% / 55% 48% 52% 45%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .b-ana .blob b { font-family: var(--font-en); font-weight: 200; font-size: 50px; line-height: 1; }
+  .b-ana .blob b small { font-family: var(--font-tc); font-weight: 500; font-size: 13px; margin-left: 3px; }
+  .b-ana .blob p { margin: 4px 0 0; font-size: 12px; letter-spacing: .16em; font-weight: 500; }
+  .b-ana .list { position: absolute; top: 420px; left: 20px; right: 20px; }
+  .b-ana .list h5 { margin: 0 0 4px; font-size: 12px; letter-spacing: .2em; color: var(--ink-2); font-weight: 500; display: flex; justify-content: space-between; }
+  .b-ana .lrow { display: grid; grid-template-columns: 112px 1fr 40px; align-items: center; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 12.5px; }
+  .b-ana .lrow .when { font-family: var(--font-en); letter-spacing: .02em; white-space: nowrap; }
+  .b-ana .lrow .bar { height: 10px; position: relative; }
+  .b-ana .lrow .bar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
+  .b-ana .lrow .bar i { position: absolute; top: 0; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #F4B49E, #E2506E); margin-left: -5px; }
+  .b-ana .lrow .bar em { position: absolute; top: 0; height: 10px; left: 0; border-radius: 6px; background: rgba(168,64,95,.16); }
+  .b-ana .lrow .n { font-family: var(--font-en); text-align: right; }
+  .b-ana .lrow.pred .when, .b-ana .lrow.pred .n { color: var(--ink-2); }
+  .b-ana .lrow.pred .bar i { background: transparent; border: 1.5px dashed var(--accent); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v9h11v-9"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><circle cx="6" cy="16" r="2"/><circle cx="12" cy="8" r="2.5"/><circle cx="18.5" cy="14" r="1.8"/><path d="M7.4 14.5 10.6 10M13.9 9.6l3.2 3"/></symbol>
+    <symbol id="i-set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M6 18l1.6-1.6M16.4 7.6 18 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 6 8.5 12l6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4 4 9-9"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 10 12"><path d="M5 0C5 0 0 5.6 0 8a5 4 0 0 0 10 0C10 5.6 5 0 5 0Z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M5 19h4L19 9l-4-4L5 15v4Z"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <h1>Luné<small>視覺提案 · 2026-11-11 · 已定案：方案 A 霧藍星球</small></h1>
+  <div class="lead">
+    <p>兩套方案都從參考網站抓出同一組版面手法，但用法不同。抓出的手法：</p>
+    <ul>
+      <li>霧面底色＋細顆粒雜訊與織紋；上方漸層淡出、帶模糊的頁首</li>
+      <li>漸層光球（玫瑰粉／檸檬薄荷／薰衣草藍），用細線串成星座</li>
+      <li>寬字距英文大寫標題，搭配小字中文副標；大而細的數字</li>
+      <li>手繪感的橢圓外框按鈕（帶微光）、細線圓形箭頭鈕、「—」短線分隔</li>
+      <li>大圓角玻璃面板（半透明＋背景模糊＋淡白邊框）</li>
+      <li>「1 / 3」章節編號＋整片漸層網格色塊、左右錯位排列的不規則圓形</li>
+    </ul>
+    <p>畫面用同一份範例資料：今天 11/11（週三），上次經期 10/28–11/1，近 5 次週期 28／30／29／31／28 天，預測下次 11/24–11/28。</p>
+  </div>
+
+  <!-- ============================== 方案 A ============================== -->
+  <section class="proposal">
+    <div class="proposal-head">
+      <h2>A <b>霧藍星球</b></h2>
+      <p>照參考網站的世界觀：霧藍底、白字，週期用漂浮的光球呈現，資料之間用細線連起來。</p>
+    </div>
+    <div class="notes">
+      <div><h3>版面手法</h3><ul><li>首頁主視覺是一顆大光球，裡面放「週期第 N 天」，旁邊的小光球分別是下次預測和上次經期，用細線相連</li><li>快速操作是三個互相交疊的手繪橢圓</li><li>分析頁把每次經期畫成一顆光球、左右錯位往下排；連線上標出週期天數</li></ul></div>
+      <div><h3>元件</h3><ul><li>表單是玻璃底部面板（34px 圓角）</li><li>導覽是浮在底部的玻璃膠囊；目前所在頁用粉色光點標示</li><li>日曆：實際經期是實心光球，預測是虛線圈，兩者都有連線把同一次經期串起來</li></ul></div>
+      <div><h3>對比與可讀性</h3><ul><li>參考網站的淺藍 #6FA6BC 配白字對比只有 2.7:1，所以文字區改用 #477A92（4.7:1）</li><li>實際經期的日期數字用深色字壓在粉色光球上（約 5.5:1）</li><li>狀態不只靠顏色區分：還有實心／虛線圈／細線圈／小圓點，另附圖例</li></ul></div>
+    </div>
+    <div class="swatches">
+      <span class="sw"><i style="background:#477A92"></i>#477A92 底</span>
+      <span class="sw"><i style="background:#3F6F86"></i>#3F6F86 深底</span>
+      <span class="sw"><i style="background:#fff"></i>#FFFFFF 字</span>
+      <span class="sw"><i class="orb-rose" style="position:relative"></i>玫瑰光球（經期）</span>
+      <span class="sw"><i class="orb-lemon" style="position:relative"></i>檸檬薄荷光球</span>
+      <span class="sw"><i class="orb-lav" style="position:relative"></i>薰衣草光球</span>
+      <span class="sw"><i style="background:#2B2A33"></i>#2B2A33 光球上的字</span>
+    </div>
+
+    <div class="frames">
+      <!-- A-1 首頁 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>01</b>首頁</div>
+        <div class="phone ta a-home"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <div class="hero">
+            <svg width="360" height="420" style="position:absolute;inset:0;z-index:1" aria-hidden="true">
+              <g stroke="rgba(255,255,255,.55)" stroke-width="1" fill="none">
+                <path d="M180 220 L300 150"/><path d="M175 270 L262 362"/><path d="M60 0 L110 98"/><path d="M300 150 L360 120"/>
+              </g>
+            </svg>
+            <div class="orb orb-rose soft big" style="z-index:2"></div>
+            <div class="orb orb-lemon glow" style="left:272px;top:122px;width:62px;height:62px;z-index:2"></div>
+            <div class="orb orb-lav glow" style="left:236px;top:336px;width:52px;height:52px;z-index:2"></div>
+            <div class="orb orb-lav soft" style="left:300px;top:40px;width:90px;height:90px;opacity:.55;filter:blur(2px)"></div>
+            <div class="orb orb-rose soft" style="left:-20px;top:20px;width:60px;height:60px;opacity:.5;filter:blur(3px)"></div>
+            <div class="day">
+              <div class="lbl">CYCLE DAY</div>
+              <div class="num">15</div>
+              <div class="cap">週期第 15 天</div>
+            </div>
+            <div class="sat" style="left:196px;top:190px;text-align:right;width:134px">下次經期<span class="tag">預測</span><b>11/24–11/28</b>13–17 天後</div>
+            <div class="sat" style="left:170px;top:392px;width:170px;text-align:right">上次 10/28–11/1 · 5 天</div>
+          </div>
+          <div class="ovals" aria-label="快速紀錄">
+            <span class="oval" style="left:18px;top:6px;width:168px;height:104px;font-size:15px"><svg class="ic"><use href="#i-plus"/></svg>開始生理期</span>
+            <span class="oval" style="left:170px;top:0;width:138px;height:88px;font-size:14px;transform:rotate(-4deg)">記錄今天</span>
+            <span class="oval" style="left:236px;top:76px;width:96px;height:62px;font-size:13px;transform:rotate(6deg)">補登</span>
+          </div>
+          <div class="recent">
+            <div class="row"><span><span class="en">11/10</span>　疲勞・平靜</span><span class="circle-btn" style="width:28px;height:28px"><svg class="ic"><use href="#i-arrow"/></svg></span></div>
+            <div class="row"><span><span class="en">11/08</span>　腰痠</span><span class="circle-btn" style="width:28px;height:28px"><svg class="ic"><use href="#i-arrow"/></svg></span></div>
+          </div>
+          <p class="disclaim">預測依過去紀錄估算，不作為避孕或醫療判斷依據。</p>
+          <nav class="nav">
+            <a aria-current="page"><svg class="ic"><use href="#i-home"/></svg>首頁</a>
+            <a><svg class="ic"><use href="#i-cal"/></svg>日曆</a>
+            <a><svg class="ic"><use href="#i-chart"/></svg>分析</a>
+            <a><svg class="ic"><use href="#i-set"/></svg>設定</a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- A-2 日曆 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>02</b>日曆＋當日詳情</div>
+        <div class="phone ta a-cal"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <div class="orb orb-lemon soft" style="left:250px;top:40px;width:150px;height:150px;opacity:.35;filter:blur(4px)"></div>
+          <div class="head">
+            <div class="ttl"><span class="en">CALENDAR</span><span class="tc">生理日曆</span></div>
+            <div class="month">
+              <span class="circle-btn" style="color:#fff"><svg class="ic"><use href="#i-left"/></svg></span>
+              <span class="m">2026 . 11</span>
+              <span class="today-pill">今天</span>
+              <span class="circle-btn" style="color:#fff"><svg class="ic"><use href="#i-right"/></svg></span>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="cal-grid" id="calA"></div>
+          </div>
+          <div class="legend">
+            <span><i class="orb-rose"></i>經期</span>
+            <span><i style="border:1.5px dashed #fff;background:rgba(246,183,196,.25)"></i>預測</span>
+            <span><i style="border:1.5px solid #fff"></i>今天</span>
+            <span><i style="width:5px;height:5px;background:#fff"></i>有紀錄</span>
+          </div>
+          <div class="detail glass">
+            <div class="date">2026-11-11 WED</div>
+            <h4>週期第 15 天</h4>
+            <span class="sep-dash"></span>
+            <dl>
+              <dt>經血量</dt><dd>無</dd>
+              <dt>心情</dt><dd>平靜</dd>
+              <dt>症狀</dt><dd style="grid-column:span 3">疲勞、腰痠</dd>
+              <dt>備註</dt><dd style="grid-column:span 3">睡前有點累</dd>
+            </dl>
+            <div class="act">
+              <span style="font-size:12px;letter-spacing:.14em;opacity:.9">刪除</span>
+              <span style="display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.14em">編輯紀錄<span class="circle-btn" style="color:#fff"><svg class="ic"><use href="#i-arrow"/></svg></span></span>
+            </div>
+          </div>
+          <nav class="nav">
+            <a><svg class="ic"><use href="#i-home"/></svg>首頁</a>
+            <a aria-current="page"><svg class="ic"><use href="#i-cal"/></svg>日曆</a>
+            <a><svg class="ic"><use href="#i-chart"/></svg>分析</a>
+            <a><svg class="ic"><use href="#i-set"/></svg>設定</a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- A-3 每日紀錄 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>03</b>記錄今天（底部面板）</div>
+        <div class="phone ta a-log"><div class="scroll">
+          <div class="behind">
+            <div class="orb orb-rose soft" style="left:-60px;top:80px;width:300px;height:300px"></div>
+            <div class="orb orb-lemon" style="left:270px;top:120px;width:62px;height:62px"></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="handle"></div>
+            <div class="sheet-head">
+              <h3>記錄今天</h3>
+              <span class="date-chip">11 月 11 日（週三）<svg class="ic sm"><use href="#i-down"/></svg></span>
+            </div>
+            <div class="fs">
+              <p>經血量</p>
+              <div class="flows">
+                <span class="flow on">無</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg></span>少量</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg></span>普通</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg></span>大量</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p>症狀（可複選）</p>
+              <div class="chips">
+                <span class="chip">經痛</span><span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>腰痠</span><span class="chip">頭痛</span><span class="chip">乳房脹痛</span>
+                <span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>疲勞</span><span class="chip">水腫</span><span class="chip">長痘痘</span><span class="chip">噁心</span><span class="chip">腹脹</span><span class="chip">其他</span>
+                <span class="chip" style="border-style:dashed">無症狀</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p>心情</p>
+              <div class="chips">
+                <span class="chip">愉快</span><span class="chip">普通</span><span class="chip">低落</span><span class="chip">焦慮</span><span class="chip">煩躁</span><span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>平靜</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p>備註</p>
+              <div class="note">睡前有點累</div>
+            </div>
+            <div class="save"><span class="oval">儲存</span></div>
+            <p class="hint">同一天再次儲存會更新這筆紀錄</p>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- A-4 分析 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>04</b>週期分析</div>
+        <div class="phone ta a-ana"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <div class="head"><div class="ttl"><span class="en">INSIGHTS</span><span class="tc">週期分析</span></div></div>
+          <div class="stats glass">
+            <div class="stat"><b>5<small>次</small></b><p>已記錄週期</p></div>
+            <div class="stat"><b>29<small>天</small></b><p>平均週期</p></div>
+            <div class="stat"><b>5<small>天</small></b><p>平均經期</p></div>
+          </div>
+          <div class="const-title"><span>最近的經期</span><span>週期差距 3 天內 · 規律</span></div>
+          <div class="const">
+            <svg width="328" height="390" style="position:absolute;inset:0" aria-hidden="true">
+              <g stroke="rgba(255,255,255,.6)" stroke-width="1" fill="none">
+                <path d="M120 30 L208 92" stroke-dasharray="4 4"/>
+                <path d="M208 92 L120 154"/><path d="M120 154 L208 216"/><path d="M208 216 L120 278"/><path d="M120 278 L208 340"/>
+              </g>
+            </svg>
+            <div class="orb glow" style="left:96px;top:6px;width:48px;height:48px;border:1.5px dashed #fff;background:rgba(246,183,196,.2)"></div>
+            <div class="orb orb-rose glow" style="left:186px;top:70px;width:44px;height:44px"></div>
+            <div class="orb orb-rose glow" style="left:98px;top:132px;width:44px;height:44px"></div>
+            <div class="orb orb-rose glow" style="left:190px;top:198px;width:36px;height:36px"></div>
+            <div class="orb orb-rose glow" style="left:98px;top:256px;width:44px;height:44px"></div>
+            <div class="orb orb-rose glow" style="left:182px;top:314px;width:52px;height:52px"></div>
+            <div class="lab" style="left:0;top:14px;width:86px;text-align:right"><b>11/26</b>預測 ±2 天</div>
+            <div class="lab" style="left:242px;top:78px"><b>10/28</b>5 天</div>
+            <div class="lab" style="left:0;top:140px;width:86px;text-align:right"><b>09/30</b>5 天</div>
+            <div class="lab" style="left:242px;top:202px"><b>08/30</b>4 天</div>
+            <div class="lab" style="left:0;top:264px;width:86px;text-align:right"><b>08/01</b>5 天</div>
+            <div class="lab" style="left:242px;top:326px"><b>07/02</b>6 天</div>
+            <span class="len pred" style="left:164px;top:61px">約 29 天</span>
+            <span class="len" style="left:164px;top:123px">28 天</span>
+            <span class="len" style="left:164px;top:185px">31 天</span>
+            <span class="len" style="left:164px;top:247px">29 天</span>
+            <span class="len" style="left:164px;top:309px">30 天</span>
+          </div>
+          <nav class="nav">
+            <a><svg class="ic"><use href="#i-home"/></svg>首頁</a>
+            <a><svg class="ic"><use href="#i-cal"/></svg>日曆</a>
+            <a aria-current="page"><svg class="ic"><use href="#i-chart"/></svg>分析</a>
+            <a><svg class="ic"><use href="#i-set"/></svg>設定</a>
+          </nav>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== 方案 B ============================== -->
+  <section class="proposal">
+    <div class="proposal-head">
+      <h2>B <b>奶油章節</b></h2>
+      <p>規格要的奶油白、深棕灰字；參考網站的「1 / 3 章節＋漸層色塊」用來排首頁，分析頁用錯位排列的不規則圓形。</p>
+    </div>
+    <div class="notes">
+      <div><h3>版面手法</h3><ul><li>首頁是三段整片漸層：1 / 3 現在（玫瑰）、2 / 3 下一次（薰衣草）、3 / 3 今天（鼠尾草），每段都有大號細數字</li><li>快速操作是墨色手繪橢圓，放在第 3 段</li><li>分析頁的三個統計數字放在錯位排列的不規則圓形裡，下方是用「—」細線分隔的週期清單</li></ul></div>
+      <div><h3>元件</h3><ul><li>每日紀錄是全螢幕頁，四個段落編號 01–04，用細線分隔</li><li>導覽是純文字，中間有圓點分隔；目前所在頁下方有一顆小光球</li><li>日曆每週用細線分隔；預測日是虛線圈加斜線（規格要的「淺粉／斜線」）</li></ul></div>
+      <div><h3>對比與可讀性</h3><ul><li>主要文字 #3D3533 在奶油底上 11:1，次要文字 #6E6461 5.4:1</li><li>強調色 #A8405F：當文字 5.5:1，上面放白字 5:1</li><li>漸層色塊上的字一律用深色，最深的粉色只放在角落</li></ul></div>
+    </div>
+    <div class="swatches">
+      <span class="sw"><i style="background:#FBF7F1"></i>#FBF7F1 奶油底</span>
+      <span class="sw"><i style="background:#3D3533"></i>#3D3533 字</span>
+      <span class="sw"><i style="background:#6E6461"></i>#6E6461 次要字</span>
+      <span class="sw"><i style="background:#A8405F"></i>#A8405F 強調</span>
+      <span class="sw"><i class="mesh-rose"></i>玫瑰色塊</span>
+      <span class="sw"><i class="mesh-lav"></i>薰衣草色塊</span>
+      <span class="sw"><i class="mesh-sage"></i>鼠尾草色塊</span>
+    </div>
+
+    <div class="frames">
+      <!-- B-1 首頁 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>01</b>首頁</div>
+        <div class="phone tb b-home"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <section class="band mesh-rose b1">
+            <div class="no">1<small>/ 3</small></div>
+            <div class="kicker"><span class="en">NOW</span>現在</div>
+            <div class="big">週期第<b>15</b>天</div>
+            <div class="sub">上次經期 10/28–11/1（5 天）· 平均週期 29 天</div>
+          </section>
+          <section class="band mesh-lav b2">
+            <div class="no">2<small>/ 3</small></div>
+            <div class="kicker"><span class="en">NEXT</span>下一次<span class="tag">預測</span></div>
+            <div class="range">11/24 – 11/28</div>
+            <div class="sub">13–17 天後 · 依最近 5 次週期估算</div>
+          </section>
+          <section class="band mesh-sage b3">
+            <div class="no">3<small>/ 3</small></div>
+            <div class="kicker"><span class="en">TODAY</span>今天</div>
+            <div class="ovals">
+              <span class="oval" style="left:22px;top:4px;width:160px;height:90px;font-size:15px;background:rgba(251,247,241,.55)"><svg class="ic"><use href="#i-plus"/></svg>開始生理期</span>
+              <span class="oval" style="left:174px;top:0;width:146px;height:78px;font-size:14px;transform:rotate(-4deg)">記錄今天</span>
+              <span class="oval" style="left:208px;top:76px;width:98px;height:54px;font-size:13px;transform:rotate(5deg)">補登</span>
+            </div>
+            <p class="disclaim">預測依過去紀錄估算，不作為避孕或醫療判斷依據。</p>
+          </section>
+          <nav class="nav">
+            <a aria-current="page">首頁</a><a>日曆</a><span class="dot"></span><a>分析</a><a>設定</a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- B-2 日曆 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>02</b>日曆＋當日詳情</div>
+        <div class="phone tb b-cal"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <div class="head">
+            <div class="ttl"><span class="en">CALENDAR</span><span class="tc">生理日曆</span></div>
+            <div class="month">
+              <span class="m">2026 . 11<small style="border:1px solid rgba(61,53,51,.3);border-radius:999px;padding:2px 10px;margin-left:10px;vertical-align:3px">今天</small></span>
+              <span style="display:flex;gap:8px"><span class="circle-btn"><svg class="ic"><use href="#i-left"/></svg></span><span class="circle-btn"><svg class="ic"><use href="#i-right"/></svg></span></span>
+            </div>
+          </div>
+          <div class="grid"><div class="cal-grid" id="calB"></div></div>
+          <div class="legend">
+            <span><i class="orb-rose"></i>經期</span>
+            <span><i style="border:1.5px dashed #A8405F;background:repeating-linear-gradient(135deg, rgba(168,64,95,.3) 0 2px, transparent 2px 5px)"></i>預測</span>
+            <span><i style="border:1.5px solid #3D3533"></i>今天</span>
+            <span><i style="width:5px;height:5px;background:#3D3533"></i>有紀錄</span>
+          </div>
+          <div class="detail">
+            <div class="date">2026-11-11 · WED</div>
+            <h4>週期第 15 天</h4>
+            <span class="circle-btn act"><svg class="ic"><use href="#i-edit"/></svg></span>
+            <div class="rows">
+              <div class="row"><span>經血量</span><span>無</span></div>
+              <div class="row"><span>症狀</span><span>疲勞 — 腰痠</span></div>
+              <div class="row"><span>心情</span><span>平靜</span></div>
+              <div class="row"><span>備註</span><span>睡前有點累</span></div>
+            </div>
+          </div>
+          <nav class="nav">
+            <a>首頁</a><a aria-current="page">日曆</a><span class="dot"></span><a>分析</a><a>設定</a>
+          </nav>
+        </div></div>
+      </div>
+
+      <!-- B-3 每日紀錄 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>03</b>記錄今天（全螢幕）</div>
+        <div class="phone tb b-log"><div class="scroll">
+          <div class="sheet">
+            <div class="sheet-head">
+              <span class="circle-btn" style="width:30px;height:30px"><svg class="ic"><use href="#i-close"/></svg></span>
+              <h3>記錄今天</h3>
+              <span class="date-chip">11/11（三）<svg class="ic sm"><use href="#i-down"/></svg></span>
+            </div>
+            <div class="fs">
+              <p><span class="en">01</span>經血量</p>
+              <div class="flows">
+                <span class="flow on">無</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg></span>少量</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg></span>普通</span>
+                <span class="flow"><span class="drops"><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg><svg><use href="#i-drop"/></svg></span>大量</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p><span class="en">02</span>症狀（可複選）</p>
+              <div class="chips">
+                <span class="chip">經痛</span><span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>腰痠</span><span class="chip">頭痛</span><span class="chip">乳房脹痛</span>
+                <span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>疲勞</span><span class="chip">水腫</span><span class="chip">長痘痘</span><span class="chip">噁心</span><span class="chip">腹脹</span><span class="chip">其他</span>
+                <span class="chip" style="border-style:dashed">無症狀</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p><span class="en">03</span>心情</p>
+              <div class="chips">
+                <span class="chip">愉快</span><span class="chip">普通</span><span class="chip">低落</span><span class="chip">焦慮</span><span class="chip">煩躁</span><span class="chip on"><svg class="ic sm"><use href="#i-check"/></svg>平靜</span>
+              </div>
+            </div>
+            <div class="fs">
+              <p><span class="en">04</span>備註</p>
+              <div class="note">睡前有點累</div>
+            </div>
+            <div class="save"><span class="oval">儲存</span></div>
+            <p style="text-align:center;font-size:11px;letter-spacing:.06em;color:#6E6461;margin:8px 0 0">同一天再次儲存會更新這筆紀錄</p>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- B-4 分析 -->
+      <div class="frame-wrap">
+        <div class="frame-label"><b>04</b>週期分析</div>
+        <div class="phone tb b-ana"><div class="scroll">
+          <div class="topbar">
+            <span class="logo">Luné</span>
+            <span class="profile"><span class="orb orb-rose orb-mini"></span>我<svg class="ic sm"><use href="#i-down"/></svg></span>
+          </div>
+          <div class="head"><div class="ttl"><span class="en">INSIGHTS</span><span class="tc">週期分析</span></div></div>
+          <div class="blobs">
+            <div class="blob mesh-rose" style="left:22px;top:0"><b>29<small>天</small></b><p>平均週期</p></div>
+            <div class="blob mesh-lav" style="left:186px;top:62px;border-radius:54% 46% 48% 52% / 46% 55% 45% 54%"><b>5<small>天</small></b><p>平均經期</p></div>
+            <div class="blob mesh-sage" style="left:40px;top:150px;width:136px;height:128px;border-radius:50% 50% 46% 54% / 52% 46% 54% 48%"><b>5<small>次</small></b><p>已記錄週期</p></div>
+            <p style="position:absolute;left:192px;top:222px;width:150px;font-size:12px;line-height:1.7;letter-spacing:.04em;color:#6E6461;margin:0">最近 5 次週期最長和最短只差 3 天，算是規律。</p>
+          </div>
+          <div class="list">
+            <h5><span>最近的週期</span><span>天數</span></h5>
+            <div class="lrow pred"><span class="when">10/28 → 11/26</span><span class="bar"><em style="width:91%"></em><i style="left:91%"></i></span><span class="n">約 29</span></div>
+            <div class="lrow"><span class="when">09/30 → 10/28</span><span class="bar"><em style="width:87%"></em><i style="left:87%"></i></span><span class="n">28</span></div>
+            <div class="lrow"><span class="when">08/30 → 09/30</span><span class="bar"><em style="width:97%"></em><i style="left:97%"></i></span><span class="n">31</span></div>
+            <div class="lrow"><span class="when">08/01 → 08/30</span><span class="bar"><em style="width:90%"></em><i style="left:90%"></i></span><span class="n">29</span></div>
+            <div class="lrow"><span class="when">07/02 → 08/01</span><span class="bar"><em style="width:94%"></em><i style="left:94%"></i></span><span class="n">30</span></div>
+          </div>
+          <nav class="nav">
+            <a>首頁</a><a>日曆</a><span class="dot"></span><a aria-current="page">分析</a><a>設定</a>
+          </nav>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="common">
+    <h2>COMMON</h2>
+    <ul>
+      <li>兩套都是手機優先；桌面版改成左側導覽，紀錄表單用側邊面板。</li>
+      <li>經期進行中時，首頁的「開始生理期」會換成「結束生理期」，並顯示經期第幾天。</li>
+      <li>首頁的 11/24–11/28 是「可能開始的區間」；日曆標的是最可能的 5 天（11/26–11/30，以平均經期 5 天推算）。</li>
+      <li>動態：光球緩慢漂浮、按鈕按下有微光擴散；系統開啟「減少動態」時全部停用。</li>
+      <li>字型：英數用 Outfit（跟參考網站同一套），中文用 Noto Sans TC（正式版會自架字型檔）。</li>
+      <li>深色模式：方案 A 本身就偏深；B 如果要做深色版，之後再補。</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  // 2026 年 11 月：1 日是週日；經期 10/28–11/1；預測 11/26–11/30；今天 11/11；有紀錄 1、3、5、8、10、11
+  function buildCal(el, theme) {
+    const wd = ["日", "一", "二", "三", "四", "五", "六"];
+    let html = wd.map((w) => `<div class="wd">${w}</div>`).join("");
+    const period = new Set([1]);
+    const pred = new Set([26, 27, 28, 29, 30]);
+    const logs = new Set([1, 3, 5, 8, 10, 11]);
+    for (let d = 1; d <= 30; d++) {
+      const cls = ["d"];
+      if (period.has(d)) cls.push("period");
+      if (pred.has(d)) cls.push("pred");
+      if (d === 11) cls.push("today");
+      let mk = "";
+      if (period.has(d)) mk = `<i class="mk orb-rose"></i>`;
+      else if (pred.has(d) || d === 11) mk = `<i class="mk"></i>`;
+      const label = [period.has(d) ? "經期" : "", pred.has(d) ? "預測經期" : "", d === 11 ? "今天" : "", logs.has(d) ? "有紀錄" : ""].filter(Boolean).join("、");
+      html += `<div class="${cls.join(" ")}" aria-label="11 月 ${d} 日${label ? "，" + label : ""}">${mk}<span>${d}</span>${logs.has(d) ? '<i class="dot"></i>' : ""}</div>`;
+    }
+    for (let d = 1; d <= 5; d++) html += `<div class="d out"><span>${d}</span></div>`;
+    el.innerHTML = html;
+    // 細線：把同一次經期的日子串起來（11/1 從左邊延續自 10 月；預測 26–28、29–30 分兩列）
+    requestAnimationFrame(() => {
+      const cells = el.querySelectorAll(".d");
+      const center = (i) => { const c = cells[i]; return { x: c.offsetLeft + c.offsetWidth / 2, y: c.offsetTop + (theme === "a" ? 20 : 23) }; };
+      const line = (x1, x2, y, dash) => { const t = document.createElement("i"); t.className = "thread" + (dash ? " dash" : ""); t.style.left = x1 + "px"; t.style.width = (x2 - x1) + "px"; t.style.top = y + "px"; el.appendChild(t); };
+      const p1 = center(0); line(-14, p1.x, p1.y, false);
+      const a = center(25), b = center(27); line(a.x, b.x, a.y, true);
+      const c = center(27); line(c.x, el.offsetWidth + 14, c.y, true);
+      const e = center(28), f = center(29); line(-14, f.x, e.y, true);
+    });
+  }
+  buildCal(document.getElementById("calA"), "a");
+  buildCal(document.getElementById("calB"), "b");
+</script>
+</body>
+</html>
