@@ -58,6 +58,24 @@ npm run dev          # http://localhost:3000
 
 部署在 Vercel 時，沒有 `DATABASE_URL` 會直接報錯；就算設了 `LUNE_LOCAL_MODE`，也不會進入本機示範模式。示範模式有寫死密碼的帳號，不能出現在公開網站。
 
+> `.env.local` 填了 Neon 的連線字串後，本機 `npm run dev` 會直接讀寫正式資料庫。只想在本機試用時，請把 `DATABASE_URL` 清空。端對端測試已經強制使用記憶體資料庫。
+
+## 部署
+
+- **資料庫**：Neon，區域 AWS `ap-southeast-1`（新加坡）。新增 migration 後，執行 `cd web && npm run db:migrate`（用 `DATABASE_URL_UNPOOLED`）。
+- **網站**：Vercel，Root Directory 設 `web`。`web/vercel.json` 把伺服器放在 `sin1`（新加坡），跟資料庫同一區。
+- **Vercel 環境變數**：只設在 **Production**。值前後不要加引號，Vercel 會把引號當成值的一部分。
+
+  | 變數 | 說明 |
+  | --- | --- |
+  | `DATABASE_URL` | Neon 的 pooled 連線（主機名稱含 `-pooler`） |
+  | `BETTER_AUTH_SECRET` | 至少 32 個字元 |
+  | `BETTER_AUTH_URL` | 正式網址，結尾不加 `/` |
+  | `LUNE_CONTACT_EMAIL` | 隱私權政策與使用條款上的聯絡信箱 |
+
+  - **Preview 不要填正式資料庫的連線字串**：不然任何預覽網址都能讀寫正式使用者的健康紀錄。沒設資料庫時，Preview 部署可以建置，但頁面會直接報錯。需要預覽時，另外開一個 Neon branch，給 Preview 用它的連線字串和一組不同的密鑰。
+  - 不要設 `LUNE_LOCAL_MODE`。`DATABASE_URL_UNPOOLED` 只有本機跑 migration 時用得到。
+
 ## 架構
 
 - **Next.js 16.4（App Router）＋ TypeScript ＋ Tailwind CSS 4**；`cacheComponents` 關閉（全是個人即時資料）
