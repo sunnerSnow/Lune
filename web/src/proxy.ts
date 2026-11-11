@@ -1,13 +1,16 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
+/** 不用登入就能看的頁面（隱私權政策、使用條款要在註冊前就讀得到） */
+const PUBLIC_PATHS = new Set(["/login", "/privacy", "/terms"]);
+
 /**
  * 只做「樂觀的」未登入導向 /login：看有沒有 session cookie，不查資料庫。
- * 真正的權限檢查在 (app) layout 與每個 Server Action 裡（requireUser / getSessionUser）。
+ * 真正的權限檢查在 (main) layout、每個 Server Action 與匯出路由裡（requireUser / getSessionUser）。
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname !== "/login" && !getSessionCookie(request)) {
+  if (!PUBLIC_PATHS.has(pathname) && !getSessionCookie(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";

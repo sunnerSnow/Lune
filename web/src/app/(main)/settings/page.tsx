@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { logoutAction } from "@/app/actions";
+import { DeleteAccount } from "@/components/settings/delete-account";
 import { ProfileManager } from "@/components/settings/profile-manager";
 import { Icon } from "@/components/ui/icon";
 import { PageTitle } from "@/components/ui/page-title";
@@ -55,11 +57,30 @@ export default async function SettingsPage() {
               <span className="font-en text-xs tracking-[0.28em]">PRIVACY</span>
               <span className="text-xs tracking-[0.2em] text-ink-soft">資料與隱私</span>
             </h2>
-            <ul className="flex flex-col gap-2 border-t border-line pt-3 text-[13px] leading-relaxed tracking-wide">
+            <ul className="flex flex-col gap-2 border-t border-line py-3 text-[13px] leading-relaxed tracking-wide">
               <li>紀錄只存在你的帳號底下，不會傳給 AI 或第三方服務。</li>
               <li>網址只帶日期，不會出現症狀、經血量或備註。</li>
-              <li className="text-ink-soft">資料匯出（JSON）與刪除帳號：下一階段加入。</li>
             </ul>
+            {/* 一般 <a>：檔案下載，不要讓 Next 預先抓取 */}
+            <a
+              href="/api/export"
+              download
+              className="flex min-h-12 items-center justify-between border-t border-line text-sm tracking-[0.14em]"
+            >
+              下載我的資料（JSON）
+              <span className="circle-btn sm" aria-hidden="true">
+                <Icon name="down" size={16} />
+              </span>
+            </a>
+            <DeleteAccount />
+            <p className="flex gap-4 border-t border-line pt-3 text-xs tracking-[0.14em] text-ink-soft">
+              <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+                隱私權政策
+              </Link>
+              <Link href="/terms" className="underline underline-offset-4 hover:text-white">
+                使用條款
+              </Link>
+            </p>
           </section>
         </div>
       </div>

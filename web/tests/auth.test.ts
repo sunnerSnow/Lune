@@ -112,4 +112,53 @@ describe("Better Auth（PGlite）", () => {
     expect(bProfiles).toHaveLength(1);
     expect(await listPeriods(db, sessionB!.user.id, bProfiles[0].id)).toHaveLength(0);
   });
+
+  it("示範使用者 A 已存在但範例資料沒寫成功：下次啟動會補上，而且不會重複", async () => {
+    // 模擬「帳號建好、播種失敗」：直接用 Better Auth 註冊 A，不播種
+    await auth.api.signUpEmail({
+      body: { email: LOCAL_USERS[0].email, password: LOCAL_USERS[0].password, name: LOCAL_USERS[0].label },
+    });
+    await ensureLocalUsers(auth, db);
+    await ensureLocalUsers(auth, db);
+    const counts = rowsOf<{ profiles: number; periods: number }>(
+      await db.execute(sql`
+        select (select count(*)::int from lune.profiles p join auth.users u on u.id = p.user_id where u.email = ${LOCAL_USERS[0].email}) profiles,
+               (select count(*)::int from lune.periods p join auth.users u on u.id = p.user_id where u.email = ${LOCAL_USERS[0].email}) periods`),
+    );
+    expect(counts[0]).toEqual({ profiles: 2, periods: 7 });
+  });
+});
+
+describe("刪除帳號", () => {
+  it("要帶正確密碼；成功後帳號、Profile、經期、每日紀錄全部刪除，session 失效", async () => {
+    const { user } = await auth.api.signUpEmail({
+      body: { email: "del@example.test", password: "password-123", name: "Del" },
+    });
+    const [profile] = await listProfiles(db, user.id);
+    await db.execute(
+      sql`insert into lune.periods (user_id, profile_id, start_date, end_date) values (${user.id}, ${profile.id}, '2026-10-01', '2026-10-05')`,
+    );
+    await db.execute(
+      sql`insert into lune.daily_logs (user_id, profile_id, log_date, mood) values (${user.id}, ${profile.id}, '2026-10-02', 'calm')`,
+    );
+    const cookie = await signInCookie("del@example.test", "password-123");
+    const headers = new Headers({ cookie });
+
+    const wrong = await auth.api.deleteUser({ body: { password: "wrong-password" }, headers, asResponse: true });
+    expect(wrong.status).toBe(400);
+    expect(await auth.api.getSession({ headers })).not.toBeNull();
+
+    await auth.api.deleteUser({ body: { password: "password-123" }, headers });
+    expect(await auth.api.getSession({ headers })).toBeNull();
+    const left = rowsOf<{ n: number }>(
+      await db.execute(sql`
+        select (select count(*) from auth.users where id = ${user.id})
+             + (select count(*) from lune.profiles where user_id = ${user.id})
+             + (select count(*) from lune.periods where user_id = ${user.id})
+             + (select count(*) from lune.daily_logs where user_id = ${user.id})
+             + (select count(*) from auth.sessions where user_id = ${user.id})
+             + (select count(*) from auth.accounts where user_id = ${user.id}) as n`),
+    );
+    expect(Number(left[0].n)).toBe(0);
+  });
 });

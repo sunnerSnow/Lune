@@ -2,10 +2,13 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { count, eq, sql } from "drizzle-orm";
 import { LOCAL_USERS } from "@/lib/auth/local-users";
 import { authEnv, isLocalMode } from "@/lib/config";
-import { authSchema } from "@/lib/db/auth-schema";
+import { authSchema, users } from "@/lib/db/auth-schema";
 import { type Db, getDb } from "@/lib/db/client";
+import { profiles } from "@/lib/db/schema";
+import { withService } from "@/lib/db/with-user";
 import { ensureFirstProfile } from "@/lib/services/profiles";
 import { seedSampleData } from "@/lib/services/sample";
 
@@ -40,6 +43,8 @@ export function createAuth(db: Db) {
       cookieCache: { enabled: false },
     },
     rateLimit: { enabled: false },
+    // 刪除帳號：Server Action 一定帶密碼呼叫（見 deleteAccountAction）；外鍵會連帶刪除所有紀錄
+    user: { deleteUser: { enabled: true } },
     databaseHooks: {
       user: {
         create: {
@@ -75,16 +80,36 @@ export function getAuth(): Promise<Auth> {
   return cache.__luneAuth;
 }
 
-/** 本機示範模式：確保兩位示範使用者存在（密碼固定，只在本機用）；A 第一次建立時載入範例資料 */
+/**
+ * 本機示範模式：確保兩位示範使用者存在（密碼固定，只在本機用）；A 要有範例資料。
+ * 範例資料在單一交易內寫入（含第二個 Profile「媽媽」），所以「只有一個 Profile」＝上次播種沒完成，這次補上。
+ */
 export async function ensureLocalUsers(auth: Auth, db: Db): Promise<void> {
   for (const u of LOCAL_USERS) {
+    let userId: string | null = null;
     try {
-      const created = await auth.api.signUpEmail({ body: { email: u.email, password: u.password, name: u.label } });
-      if (u.sample) await seedSampleData(db, created.user.id);
+      userId = (await auth.api.signUpEmail({ body: { email: u.email, password: u.password, name: u.label } })).user.id;
     } catch (error) {
       // 已存在就略過（USER_ALREADY_EXISTS）；其他錯誤丟出
       const code = (error as { body?: { code?: string } })?.body?.code ?? "";
       if (!/ALREADY_EXISTS/.test(code)) throw error;
     }
+    if (!u.sample) continue;
+    userId ??= await findUserIdByEmail(db, u.email);
+    if (userId && (await countProfiles(db, userId)) < 2) await seedSampleData(db, userId);
   }
+}
+
+async function findUserIdByEmail(db: Db, email: string): Promise<string | null> {
+  const [row] = await withService(db, (tx) =>
+    tx.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${email.toLowerCase()}`).limit(1),
+  );
+  return row?.id ?? null;
+}
+
+async function countProfiles(db: Db, userId: string): Promise<number> {
+  const [row] = await withService(db, (tx) =>
+    tx.select({ n: count() }).from(profiles).where(eq(profiles.userId, userId)),
+  );
+  return row?.n ?? 0;
 }

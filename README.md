@@ -18,7 +18,7 @@
 | 5 | 每日紀錄：單日一筆、症狀多選（無症狀互斥） | 完成 |
 | 6 | 月曆：月份切換、實際／預測／有紀錄標示、點日期看詳情與新增 | 完成 |
 | 7 | 首頁摘要、快速操作、分析頁 | 完成 |
-| 8 | 設定（JSON 匯出、刪除帳號）、隱私權政策／使用條款、e2e、部署 | 未開始 |
+| 8 | JSON 匯出、刪除帳號、隱私權政策／使用條款、安全強化、e2e | 完成；**部署待辦**（要先建 Neon 專案） |
 
 ## 本機開發
 
@@ -37,7 +37,8 @@ npm run dev          # http://localhost:3000
 
 | 指令 | 用途 |
 | --- | --- |
-| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離） |
+| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離、限流、匯出、刪除帳號） |
+| `npm run test:e2e` | Playwright：先建置，再以本機示範模式（記憶體 PGlite）跑手機＋桌面的端對端測試；用電腦上的 Chrome。剛建置過可設 `E2E_SKIP_BUILD=1` 跳過建置 |
 | `npm run typecheck` | 產生路由型別後跑 tsc |
 | `npm run lint` | ESLint |
 | `npm run build` | 正式建置 |
@@ -53,6 +54,9 @@ npm run dev          # http://localhost:3000
 - `DATABASE_URL_UNPOOLED`：Neon 的 direct 連線，只給 `npm run db:migrate`
 - `BETTER_AUTH_SECRET`：至少 32 個字元
 - `BETTER_AUTH_URL`：網站網址
+- `LUNE_CONTACT_EMAIL`：隱私權政策與使用條款上的聯絡信箱（沒設會顯示「尚未設定」）
+
+部署在 Vercel 時，沒有 `DATABASE_URL` 會直接報錯；就算設了 `LUNE_LOCAL_MODE`，也不會進入本機示範模式。示範模式有寫死密碼的帳號，不能出現在公開網站。
 
 ## 架構
 
@@ -72,11 +76,12 @@ web/
     lib/
       date/date-utils.ts  日期工具（全部字串運算，不受時區影響）、月曆格
       cycle/              週期統計、預測、月曆標示、經期重疊規則（純函式）
-      services/           資料存取（profiles、periods、daily-logs、rate-limit、範例資料）
+      services/           資料存取（profiles、periods、daily-logs、export、rate-limit、login-guard、範例資料）
       validation/         zod 驗證（前後端共用）
       db/                 連線、schema、withUser
       auth/               Better Auth、session、示範使用者
   tests/                  Vitest（純函式＋PGlite 整合）
+  e2e/                    Playwright 端對端測試（手機＋桌面）
 ```
 
 ## 視覺
@@ -127,8 +132,21 @@ web/
 - 距離最近一次開始日超過 90 天：不顯示週期天數、不預測（可能漏記）。
 - 補登某天的症狀不會讓那天變成經期；經期只看經期紀錄。
 
-## 隱私
+## 隱私與安全
 
 - 每筆資料都綁定 `user_id` 與 `profile_id`；經期與每日紀錄用 (profile_id, user_id) 複合外鍵綁定，不能掛到別人的 Profile。
 - 錯誤日誌只記錯誤類型與代碼，不記任何健康紀錄內容。
-- 刪除帳號會連帶刪除所有 Profile 與紀錄（外鍵 on delete cascade）。
+- **匯出**：設定頁「下載我的資料」→ `GET /api/export`，回傳這個帳號所有 Profile（含已封存）、經期與每日紀錄的 JSON（格式 `lune-export@1`）。不快取。
+- **刪除帳號**：設定頁一定要勾選確認並重新輸入密碼；刪除 `auth.users` 後由外鍵連帶刪除所有 Profile 與紀錄，session 同時失效。
+- **隱私權政策／使用條款**：`/privacy`、`/terms`，不用登入就能看；聯絡信箱由 `LUNE_CONTACT_EMAIL` 提供。
+- **登入限制**（`web/src/lib/services/login-guard.ts`）：
+  - 每個 IP 的所有嘗試，每 10 分鐘 30 次；
+  - 同一來源對同一帳號只計失敗，每 15 分鐘 5 次，成功就清掉；
+  - 同一帳號所有來源合計失敗，每小時 50 次。
+
+  別人猜錯密碼，不會鎖住你從自己的裝置登入。刪除帳號時輸入的密碼也套用同一套限制。
+- **已知取捨**：註冊時會告知「Email 已註冊」。沒有寄信驗證的流程，就無法完全避免有人藉此查出某個 Email 有沒有註冊；目前靠 IP 限流降低大量探測。之後接上寄信服務時，改成「一律回覆已寄出驗證信」。
+- **安全標頭**（`web/next.config.ts`）：
+  - `X-Frame-Options: DENY` 與 `frame-ancestors 'none'`：不能被其他網站嵌入；
+  - `nosniff`、`Referrer-Policy: same-origin`、`Permissions-Policy`；
+  - 正式環境另加 HSTS。

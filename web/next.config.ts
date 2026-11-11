@@ -17,6 +17,24 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  poweredByHeader: false,
+  // 安全標頭：健康紀錄頁面不能被其他網站嵌入（點擊劫持）；網址只帶日期，但仍不把它當 referrer 送給別站
+  async headers() {
+    const security = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "DENY" },
+      {
+        key: "Content-Security-Policy",
+        value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
+      },
+      { key: "Referrer-Policy", value: "same-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+      ...(process.env.NODE_ENV === "production"
+        ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]
+        : []),
+    ];
+    return [{ source: "/:path*", headers: security }];
+  },
 };
 
 export default nextConfig;

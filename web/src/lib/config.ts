@@ -6,10 +6,19 @@
  */
 export function isLocalMode(): boolean {
   if (process.env.DATABASE_URL) return false;
+  // 示範模式有寫死密碼的帳號，等於後門：部署在 Vercel 上一律不允許，就算設了 LUNE_LOCAL_MODE 也一樣
+  if (process.env.VERCEL) {
+    throw new Error("部署環境必須設定 DATABASE_URL；本機示範模式不能用在部署環境");
+  }
   if (process.env.NODE_ENV === "production" && process.env.LUNE_LOCAL_MODE !== "1") {
     throw new Error("正式環境必須設定 DATABASE_URL；本機用 next start 示範時請設 LUNE_LOCAL_MODE=1");
   }
   return true;
+}
+
+/** 正式建置卻跑在示範模式（只該出現在本機 next start）：登入頁會顯示醒目警告 */
+export function isLocalModeInProduction(): boolean {
+  return process.env.NODE_ENV === "production" && isLocalMode();
 }
 
 /** Better Auth 的密鑰與網址；只有開發模式的本機示範允許省略（用固定的開發用密鑰），production 一律要設 */
