@@ -71,10 +71,15 @@ body::after {
   opacity: 0.5;
 }
 
-:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 8px;
+/*
+ * 鍵盤焦點：放在 base 圖層，讓元件（例如底線輸入框）能用自己的焦點樣式覆蓋。
+ * 不設 border-radius：外框會跟著元件本身的圓角，不會把膠囊、圓形按鈕改成方角。
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
 }
 
 @layer components {

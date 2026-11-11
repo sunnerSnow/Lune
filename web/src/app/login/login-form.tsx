@@ -75,7 +75,7 @@ export function LoginForm() {
             aria-describedby={`${id}-name-hint`}
           />
           <p id={`${id}-name-hint`} className="mt-1.5 text-xs tracking-wide text-ink-soft">
-            也會是第一個 Profile 的名稱；留空就用 Email 的帳號部分
+            也是第一個 Profile 的名稱；留空就用 Email 帳號
           </p>
         </div>
       )}
