@@ -40,6 +40,13 @@ export async function underRateLimit(db: Db, key: string, max: number, windowSec
   return (rowsOf<{ count: number }>(rows)[0]?.count ?? 0) < max;
 }
 
+/** 退回一次（預先計入的嘗試最後成功了）；不會低於 0 */
+export async function releaseRateLimit(db: Db, key: string): Promise<void> {
+  await withService(db, (tx) =>
+    tx.execute(sql`update lune.rate_limits set count = greatest(count - 1, 0) where key = ${key}`),
+  );
+}
+
 /** 清掉某個 key 的計數（例如成功登入後清掉這個來源的失敗次數） */
 export async function resetRateLimit(db: Db, key: string): Promise<void> {
   await withService(db, (tx) => tx.execute(sql`delete from lune.rate_limits where key = ${key}`));

@@ -21,4 +21,9 @@ describe("品牌標誌：元件與產生腳本一致", () => {
     expect(script).toContain(`stroke-width="${MARK.ringWidthSmall}"`);
     expect(script).toContain(`stroke-width="${MARK.ringWidth}"`);
   });
+
+  it("大頭貼的光球位置也跟標誌一致（半徑與線寬是大頭貼自己的設定）", () => {
+    expect(script).toContain(`rose("a", ${MARK.rose.cx}, ${MARK.rose.cy},`);
+    expect(script).toContain(`lemon("a", ${MARK.lemon.cx}, ${MARK.lemon.cy},`);
+  });
 });

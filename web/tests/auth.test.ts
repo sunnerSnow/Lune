@@ -146,6 +146,8 @@ describe("刪除帳號", () => {
 
     const wrong = await auth.api.deleteUser({ body: { password: "wrong-password" }, headers, asResponse: true });
     expect(wrong.status).toBe(400);
+    // deleteAccountAction 靠這個錯誤碼判斷「密碼不正確」
+    expect((await wrong.json()).code).toBe("INVALID_PASSWORD");
     expect(await auth.api.getSession({ headers })).not.toBeNull();
 
     await auth.api.deleteUser({ body: { password: "password-123" }, headers });

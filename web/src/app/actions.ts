@@ -11,7 +11,7 @@ import { PROFILE_COOKIE, setCurrentProfileCookie } from "@/lib/current-profile";
 import { getDb } from "@/lib/db/client";
 import { AppError, type FieldIssue, unauthorized } from "@/lib/errors";
 import { deleteDailyLog, getDailyLog, saveDailyLog } from "@/lib/services/daily-logs";
-import { allowAttempt, recordFailure, recordSuccess } from "@/lib/services/login-guard";
+import { attemptAborted, attemptSucceeded, reserveAttempt } from "@/lib/services/login-guard";
 import { createPeriod, deletePeriod, endPeriod, startPeriod, updatePeriod } from "@/lib/services/periods";
 import { createProfile, resolveCurrentProfile, setProfileArchived, updateProfile } from "@/lib/services/profiles";
 import { clientIp } from "@/lib/services/rate-limit";
@@ -172,8 +172,8 @@ function isBadCredentials(error: unknown): boolean {
 }
 
 /**
- * 登入／註冊。限流見 lib/services/login-guard.ts：IP 計所有嘗試；帳號只計失敗、成功就清掉同來源的紀錄。
- * 註冊時「Email 已註冊」會直接告知：沒有寄信驗證的流程時無法完全避免帳號枚舉，靠 IP 限流降低大量探測。
+ * 登入／註冊。限流見 lib/services/login-guard.ts：嘗試前先預記一次失敗（原子操作），成功才清掉／退回。
+ * 註冊時「Email 已註冊」會直接告知：沒有寄信驗證的流程時無法完全避免帳號枚舉，靠限流降低大量探測。
  */
 export async function loginAction(intent: "signin" | "signup", input: Credentials): Promise<AuthState> {
   const parsed = credentialsSchema.safeParse(input);
@@ -187,7 +187,9 @@ export async function loginAction(intent: "signin" | "signup", input: Credential
   const db = await getDb();
   const ip = clientIp(requestHeaders);
   const email = parsed.data.email;
-  if (!(await allowAttempt(db, ip, email))) return { error: TOO_MANY };
+  // 註冊不計帳號合計：別人拿你的 Email 一直註冊，不該鎖住你的登入
+  const opts = { countAccount: intent === "signin" };
+  if (!(await reserveAttempt(db, ip, email, opts))) return { error: TOO_MANY };
   const auth = await getAuth();
   try {
     if (intent === "signup") {
@@ -197,10 +199,16 @@ export async function loginAction(intent: "signin" | "signup", input: Credential
       await auth.api.signInEmail({ body: { email, password: parsed.data.password }, headers: requestHeaders });
     }
   } catch (error) {
-    if (intent === "signin" && isBadCredentials(error)) await recordFailure(db, ip, email);
+    // 密碼錯誤（登入）或 Email 已註冊（註冊）：維持預先記的失敗；其他錯誤全部退回
+    const expected =
+      intent === "signin"
+        ? isBadCredentials(error)
+        : error instanceof APIError && /ALREADY_EXISTS/.test(error.body?.code ?? "");
+    if (!expected) await attemptAborted(db, ip, email, opts).catch(logError);
     return { error: authErrorMessage(error, intent) };
   }
-  await recordSuccess(db, ip, email);
+  // 登入已經成功（cookie 已寫入）：清理計數失敗也照樣進首頁
+  await attemptSucceeded(db, ip, email, opts).catch(logError);
   redirect("/dashboard");
 }
 
@@ -210,9 +218,18 @@ export async function loginLocalAction(formData: FormData): Promise<void> {
   const user = LOCAL_USERS.find((u) => u.key === formData.get("user"));
   if (!user) redirect("/login");
   const requestHeaders = await headers();
-  if (!(await allowAttempt(await getDb(), clientIp(requestHeaders), user.email))) redirect("/login");
+  const db = await getDb();
+  const ip = clientIp(requestHeaders);
+  if (!(await reserveAttempt(db, ip, user.email))) redirect("/login");
   const auth = await getAuth();
-  await auth.api.signInEmail({ body: { email: user.email, password: user.password }, headers: requestHeaders });
+  try {
+    await auth.api.signInEmail({ body: { email: user.email, password: user.password }, headers: requestHeaders });
+  } catch (error) {
+    logError(error);
+    await attemptAborted(db, ip, user.email).catch(logError);
+    redirect("/login");
+  }
+  await attemptSucceeded(db, ip, user.email).catch(logError);
   redirect("/dashboard");
 }
 
@@ -229,18 +246,20 @@ export async function deleteAccountAction(password: string): Promise<{ error?: s
   const db = await getDb();
   const ip = clientIp(requestHeaders);
   const account = `delete:${user.id}`;
-  if (!(await allowAttempt(db, ip, account))) return { error: TOO_MANY };
+  if (!(await reserveAttempt(db, ip, account))) return { error: TOO_MANY };
   const auth = await getAuth();
   try {
     await auth.api.deleteUser({ body: { password }, headers: requestHeaders });
   } catch (error) {
-    if (isBadCredentials(error)) {
-      await recordFailure(db, ip, account);
-      return { error: "密碼不正確" };
-    }
+    // 只有確定是密碼錯誤才說「密碼不正確」並維持失敗計數；
+    // 其他錯誤（例如 session 剛好失效）不誤導使用者，預先記的次數也退回
+    const code = error instanceof APIError ? (error.body?.code ?? "") : "";
+    if (/INVALID_PASSWORD/.test(code)) return { error: "密碼不正確" };
     logError(error);
-    return { error: "刪除失敗，請稍後再試" };
+    await attemptAborted(db, ip, account).catch(logError);
+    return { error: "刪除失敗，請重新登入後再試" };
   }
+  await attemptSucceeded(db, ip, account).catch(logError);
   const jar = await cookies();
   jar.delete(PROFILE_COOKIE);
   redirect("/login?deleted=1");
