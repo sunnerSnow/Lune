@@ -28,7 +28,7 @@ export const periodInputSchema = z
   .superRefine((v, ctx) => {
     if (v.endDate === null) return;
     if (v.endDate < v.startDate) {
-      ctx.addIssue({ code: "custom", path: ["endDate"], message: "結束日期不可早於開始日期" });
+      ctx.addIssue({ code: "custom", path: ["endDate"], message: "結束日期不能早於開始日期" });
     } else if (diffDays(v.startDate, v.endDate) + 1 > MAX_PERIOD_DAYS) {
       ctx.addIssue({ code: "custom", path: ["endDate"], message: `單次經期最長 ${MAX_PERIOD_DAYS} 天，請檢查日期` });
     }

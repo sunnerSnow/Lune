@@ -115,9 +115,9 @@ export async function endPeriod(
       .from(periods)
       .where(and(eq(periods.userId, userId), eq(periods.profileId, profile.id), isNull(periods.endDate)))
       .limit(1);
-    if (!open) throw new AppError("no_active_period", "目前沒有進行中的經期；要補登過去的經期請從日曆新增", 409);
+    if (!open) throw new AppError("no_active_period", "目前沒有進行中的經期。要補登過去的經期，可以從日曆新增", 409);
     if (endDate < open.startDate) {
-      throw validationFailed([{ field: "endDate", message: "結束日期不可早於開始日期" }]);
+      throw validationFailed([{ field: "endDate", message: "結束日期不能早於開始日期" }]);
     }
     if (diffDays(open.startDate, endDate) + 1 > MAX_PERIOD_DAYS) {
       throw validationFailed([{ field: "endDate", message: `單次經期最長 ${MAX_PERIOD_DAYS} 天，請檢查日期` }]);

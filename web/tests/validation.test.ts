@@ -32,7 +32,7 @@ describe("經期驗證", () => {
   it("結束日不可早於開始日、最長 60 天；結束日可留空", () => {
     expect(periodInputSchema.parse({ startDate: "2026-11-01" }).endDate).toBeNull();
     const early = periodInputSchema.safeParse({ startDate: "2026-11-05", endDate: "2026-11-04" });
-    expect(early.error?.issues[0]).toMatchObject({ path: ["endDate"], message: "結束日期不可早於開始日期" });
+    expect(early.error?.issues[0]).toMatchObject({ path: ["endDate"], message: "結束日期不能早於開始日期" });
     expect(periodInputSchema.safeParse({ startDate: "2026-01-01", endDate: "2026-03-01" }).success).toBe(true);
     expect(periodInputSchema.safeParse({ startDate: "2026-01-01", endDate: "2026-03-02" }).success).toBe(false);
   });

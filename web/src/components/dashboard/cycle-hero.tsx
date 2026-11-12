@@ -44,7 +44,7 @@ export function CycleHero({
       </div>
 
       {/* 下次經期（預測） */}
-      <div className="absolute top-[156px] right-0 w-[150px] text-right text-xs leading-relaxed tracking-[0.08em]">
+      <div className="absolute top-[170px] right-0 w-[150px] text-right text-xs leading-relaxed tracking-[0.08em]">
         {p && status !== "late" && (
           <>
             下次經期 <span className="tag-dashed ml-1">預測</span>

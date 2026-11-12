@@ -89,6 +89,8 @@ npm run dev          # http://localhost:3000
 web/
   db/migrations/          SQL migration（可重複執行；本機啟動與 db:migrate 共用）
   scripts/migrate.ts      對 Postgres 跑 migration 並檢查權限
+  scripts/build-brand.mjs 產生品牌向量檔、圖示、favicon、分享預覽圖
+  scripts/subset-font.py  自架字型分片；wordmark-path.py 把字標轉成路徑
   src/
     app/                  頁面與 Server Actions（actions.ts）
     lib/
@@ -102,11 +104,26 @@ web/
   e2e/                    Playwright 端對端測試（手機＋桌面）
 ```
 
+## 品牌
+
+完整規範在 [`docs/brand-guidelines.md`](docs/brand-guidelines.md)，內容包括語氣、用詞、標誌使用規則、色彩與對比、字型、圖形元素。
+
+- **標誌**：C「週期軌道」，提案稿在 [`design/logo-proposals.html`](design/logo-proposals.html)。向量檔放在 `docs/brand/`；頁面上用的元件是 `web/src/components/ui/brand-mark.tsx`。
+- **圖示、PWA、分享預覽圖**：都由 `cd web && node scripts/build-brand.mjs` 產生，會用到電腦上的 Chrome。產出包括：
+  - `src/app/icon.svg`、`favicon.ico`、`apple-icon.png`、`opengraph-image.png`；
+  - `public/icons/icon-192／512、maskable-512.png`。
+
+  PWA 設定在 `src/app/manifest.ts`。
+
 ## 視覺
 
 方案 A「霧藍星球」（提案稿與另一個沒採用的方案在 [`design/proposals.html`](design/proposals.html)）。token 與元件樣式都在 `web/src/app/globals.css`。
 
-- **底色**：霧藍漸層＋細織紋＋顆粒雜訊，文字一律白色。文字區的底色不淺於 `#477A92`（白字對比 4.7:1）；更淺的霧藍只用在裝飾。
+- **底色**：霧藍漸層＋細織紋＋顆粒雜訊，文字一律白色。
+  - 文字的底色「畫出來」不能淺於 `#477A92`（白字 4.7:1）。顆粒雜訊會把底色提亮約 8 階，所以底層漸層刻意調深（`#40728A → #3A687E`）。
+  - 更淺的霧藍只用在裝飾。
+  - 玻璃面板用偏深的半透明，不用白色半透明。
+- **量對比**：只看色碼不準，要量實際畫出來的畫面。做法是用無頭瀏覽器把文字暫時設成透明後截圖，再到原本有文字的範圍內取樣底色。2026-11-12 量過首頁、日曆、分析、設定、記錄面板，白字最低 4.62:1。
 - **光球**：漸層圓（`orb-rose`、`orb-lavender`、`orb-peach`、`orb-sage`、`orb-sky`、`orb-sand`），也是 Profile 的代表色。實際經期一律用玫瑰色，預測用虛線圈（`orb-predicted`）。光球上的字用深色 `#2B2A33`。
 - **版面手法**：
   - 首頁一顆大光球放「週期第 N 天」，兩顆小光球（預測／上次經期）用細線連起來；

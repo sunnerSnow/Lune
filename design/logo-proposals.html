@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Luné Logo 提案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root { --font-en: "Outfit", sans-serif; --font-tc: "Noto Sans TC", sans-serif; --ink: #2B3A44; --cream: #F7F4EF; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #ECEEF0; color: #2A2C2E; font-family: var(--font-tc); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1500px; margin: 0 auto; padding: 48px 28px 96px; }
+  h1 { font-family: var(--font-en); font-weight: 300; font-size: 40px; letter-spacing: .14em; margin: 0; }
+  h1 small { display: block; font-family: var(--font-tc); font-size: 15px; letter-spacing: .2em; font-weight: 500; margin-top: 6px; color: #555; }
+  .lead { max-width: 900px; line-height: 1.9; font-size: 15px; color: #3c3f42; }
+  .concept { margin-top: 64px; background: #fff; border-radius: 28px; padding: 32px; box-shadow: 0 20px 50px -30px rgba(20,30,40,.35); }
+  .concept-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+  .concept-head h2 { font-family: var(--font-en); font-weight: 300; font-size: 28px; letter-spacing: .12em; margin: 0; }
+  .concept-head h2 b { font-family: var(--font-tc); font-weight: 500; letter-spacing: .08em; }
+  .concept-head p { margin: 0; color: #555; font-size: 14px; }
+  .story { margin: 14px 0 24px; font-size: 14px; line-height: 1.85; color: #3c3f42; max-width: 980px; }
+  .story b { color: #222; }
+  .row { display: grid; grid-template-columns: 220px 300px 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 1100px) { .row { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+  .cell-label { font-size: 12px; letter-spacing: .16em; color: #666; margin-bottom: 10px; }
+  .big-icon { width: 200px; height: 200px; border-radius: 46px; overflow: hidden; box-shadow: 0 18px 36px -18px rgba(20,40,60,.55); }
+  .big-icon svg { width: 100%; height: 100%; display: block; }
+
+  /* 手機主畫面 */
+  .home { width: 300px; border-radius: 28px; padding: 22px 18px 26px; background: radial-gradient(90% 70% at 20% 10%, #F6D7C8, transparent 60%), radial-gradient(80% 70% at 90% 90%, #B9C9E8, transparent 60%), #E9DCE8; }
+  .home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 10px; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 10.5px; color: #2b2b2b; letter-spacing: .02em; }
+  .app i { width: 54px; height: 54px; border-radius: 13px; display: block; background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.6); }
+  .app svg { width: 54px; height: 54px; border-radius: 13px; display: block; box-shadow: 0 6px 14px -8px rgba(20,40,60,.6); }
+  .home .dock { margin-top: 18px; background: rgba(255,255,255,.35); border-radius: 22px; padding: 10px; display: flex; justify-content: space-around; }
+  .home .dock i { width: 46px; height: 46px; border-radius: 12px; background: rgba(255,255,255,.6); display: block; }
+
+  /* 瀏覽器分頁＋尺寸 */
+  .tabbar { background: #DADDE1; border-radius: 12px 12px 0 0; padding: 8px 8px 0; display: flex; gap: 4px; max-width: 520px; }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px 10px 0 0; font-size: 12.5px; color: #333; background: #fff; min-width: 190px; }
+  .tab.off { background: transparent; color: #666; min-width: 120px; }
+  .tab svg { width: 16px; height: 16px; border-radius: 4px; flex: none; }
+  .tab .g { width: 16px; height: 16px; border-radius: 50%; background: #9aa1a8; flex: none; }
+  .urlbar { background: #fff; max-width: 520px; padding: 8px 14px 12px; font-size: 12px; color: #777; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 1px 0 #DADDE1 inset; }
+  .sizes { display: flex; align-items: flex-end; gap: 22px; margin-top: 22px; }
+  .sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: #777; font-family: var(--font-en); }
+  .sizes svg { display: block; }
+
+  /* 組合標誌 */
+  .lockups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+  @media (max-width: 640px) { .lockups { grid-template-columns: 1fr; } }
+  .lock { border-radius: 18px; padding: 22px 20px; display: flex; align-items: center; gap: 14px; min-height: 96px; }
+  .lock.dark { background: linear-gradient(180deg, #4E849C, #3F6F86); color: #fff; }
+  .lock.light { background: var(--cream); color: var(--ink); box-shadow: inset 0 0 0 1px #e6e1d8; }
+  .lock svg { width: 52px; height: 52px; flex: none; }
+  .word { font-family: var(--font-en); font-weight: 300; font-size: 34px; letter-spacing: .16em; line-height: 1; }
+  .word.lower { letter-spacing: .08em; }
+  .tagline { font-size: 11px; letter-spacing: .3em; margin-top: 6px; opacity: .85; }
+
+  .pros { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; margin-top: 22px; font-size: 13px; line-height: 1.8; color: #3c3f42; }
+  .pros h3 { font-size: 12px; letter-spacing: .16em; margin: 0 0 2px; color: #222; }
+  .pros ul { margin: 0; padding-left: 18px; }
+  @media (max-width: 640px) { .pros { grid-template-columns: 1fr; } }
+  .common { margin-top: 64px; max-width: 980px; font-size: 14px; line-height: 1.9; color: #3c3f42; }
+  .common h2 { font-family: var(--font-en); font-weight: 300; letter-spacing: .12em; font-size: 24px; margin: 0 0 8px; color: #222; }
+</style>
+</head>
+<body>
+
+<!-- 共用：漸層、濾鏡、各概念的標誌（線條用 currentColor，深底白線、淺底深線） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="tileBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5E93AA"/>
+      <stop offset="1" stop-color="#3F6F86"/>
+    </linearGradient>
+    <radialGradient id="tileMist" cx=".18" cy=".05" r=".85">
+      <stop offset="0" stop-color="#A9CCDB" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#A9CCDB" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 玫瑰光球 -->
+    <radialGradient id="roseA" cx=".7" cy=".3" r=".5"><stop offset="0" stop-color="#E2506E"/><stop offset="1" stop-color="#E2506E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="roseB" cx=".28" cy=".72" r=".55"><stop offset="0" stop-color="#F4B49E"/><stop offset="1" stop-color="#F4B49E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="roseC" cx=".34" cy=".28" r=".56"><stop offset="0" stop-color="#EA9CC8"/><stop offset="1" stop-color="#EA9CC8" stop-opacity="0"/></radialGradient>
+    <!-- 檸檬薄荷光球 -->
+    <radialGradient id="lemA" cx=".62" cy=".46" r=".45"><stop offset="0" stop-color="#9FDDB4"/><stop offset="1" stop-color="#9FDDB4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="lemB" cx=".3" cy=".3" r=".55"><stop offset="0" stop-color="#F7F5CC"/><stop offset="1" stop-color="#F7F5CC" stop-opacity="0"/></radialGradient>
+    <!-- 光球的高光（左上） -->
+    <radialGradient id="shine" cx=".34" cy=".28" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+
+    <!-- 光球元件（中心 0,0、半徑 1，再用 transform 放大） -->
+    <g id="orbRose">
+      <circle r="1" fill="#EE8DA2"/><circle r="1" fill="url(#roseC)"/><circle r="1" fill="url(#roseB)"/><circle r="1" fill="url(#roseA)"/><circle r="1" fill="url(#shine)"/>
+    </g>
+    <g id="orbLemon">
+      <circle r="1" fill="#E8E89C"/><circle r="1" fill="url(#lemB)"/><circle r="1" fill="url(#lemA)"/><circle r="1" fill="url(#shine)"/>
+    </g>
+
+    <!-- 圖示底 -->
+    <symbol id="tile" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="url(#tileBg)"/>
+      <rect width="100" height="100" fill="url(#tileMist)"/>
+    </symbol>
+
+    <!-- A 雙星：現在的光球，用一條細線連到下一次 -->
+    <symbol id="markA" viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".85">
+        <path d="M43 58 L77 25"/>
+        <path d="M77 25 L92 10" opacity=".6"/>
+      </g>
+      <use href="#orbRose" transform="translate(42 58) scale(25)"/>
+      <use href="#orbLemon" transform="translate(77 25) scale(8)"/>
+    </symbol>
+
+    <!-- B 月相：實心的月牙＝已記錄，虛線補完的圓＝預測 -->
+    <mask id="crescentMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+      <rect width="100" height="100" fill="#fff"/>
+      <circle cx="63" cy="40" r="25" fill="#000"/>
+    </mask>
+    <symbol id="markB" viewBox="0 0 100 100">
+      <circle cx="50" cy="52" r="28" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4.5 3.6" stroke-linecap="round" opacity=".9"/>
+      <g mask="url(#crescentMask)">
+        <use href="#orbRose" transform="translate(50 52) scale(28)"/>
+      </g>
+    </symbol>
+    <!-- B 的小尺寸版：虛線在 16px 會糊成一團，改成淡實線 -->
+    <symbol id="markBsmall" viewBox="0 0 100 100">
+      <circle cx="50" cy="52" r="28" fill="none" stroke="currentColor" stroke-width="4" opacity=".55"/>
+      <g mask="url(#crescentMask)">
+        <use href="#orbRose" transform="translate(50 52) scale(28)"/>
+      </g>
+    </symbol>
+
+    <!-- C 週期軌道：手繪感的橢圓軌道，光球是今天的位置 -->
+    <symbol id="markC" viewBox="0 0 100 100">
+      <g transform="rotate(-22 50 52)" fill="none" stroke="currentColor" stroke-linecap="round">
+        <path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" stroke-width="2.4"/>
+        <path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" stroke-width="6" opacity=".18" filter="url(#soft)"/>
+      </g>
+      <use href="#orbRose" transform="translate(71 31) scale(12.5)"/>
+      <use href="#orbLemon" transform="translate(22 72) scale(4.2)"/>
+    </symbol>
+
+    <!-- D é 字標：é 的重音符號換成光球＋細線 -->
+    <symbol id="markD" viewBox="0 0 100 100">
+      <text x="50" y="80" text-anchor="middle" font-family="Outfit" font-weight="300" font-size="74" fill="currentColor">e</text>
+      <path d="M45 31 L55.5 20.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+      <use href="#orbRose" transform="translate(57 19) scale(6)"/>
+      <use href="#orbLemon" transform="translate(44.2 31.8) scale(2.4)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <h1>Luné<small>Logo／App icon 提案 · 2026-11-11</small></h1>
+  <div class="lead">
+    <p>四個方向都從已定案的方案 A「霧藍星球」延伸：霧藍底、玫瑰光球、細白線。名字「Luné」來自法文 <i>lune</i>（月亮），月亮本身就是約一個月一輪的週期。</p>
+    <p>每個概念都附上：App 圖示（手機主畫面）、瀏覽器分頁、實際尺寸 64／32／16 px、在深色與淺色底上的組合標誌。</p>
+  </div>
+
+  <!-- ===== A ===== -->
+  <section class="concept">
+    <div class="concept-head"><h2>A <b>雙星</b></h2><p>Orb &amp; Thread：現在的光球，用一條細線連到下一次</p></div>
+    <p class="story">大光球是這一次的週期，小光球是預測的下一次，兩者用細線相連。這組畫面直接出自首頁的主視覺（大光球＋衛星＋細線），App 一打開就跟圖示對得上。<b>讀法：</b>「從現在到下一次」。</p>
+    <div class="row">
+      <div><div class="cell-label">APP ICON</div><div class="big-icon"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg></div></div>
+      <div><div class="cell-label">手機主畫面</div>
+        <div class="home"><div class="home-grid">
+          <div class="app"><i></i>相機</div><div class="app"><i></i>天氣</div>
+          <div class="app"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg>Luné</div><div class="app"><i></i>行事曆</div>
+          <div class="app"><i></i>備忘錄</div><div class="app"><i></i>音樂</div><div class="app"><i></i>健康</div><div class="app"><i></i>地圖</div>
+        </div><div class="dock"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div>
+        <div class="cell-label">瀏覽器分頁</div>
+        <div class="tabbar"><div class="tab"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg>首頁 · Luné</div><div class="tab off"><span class="g"></span>新分頁</div></div>
+        <div class="urlbar">lune-murex.vercel.app/dashboard</div>
+        <div class="sizes">
+          <figure><svg width="64" height="64" viewBox="0 0 100 100" style="border-radius:14px"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg>64</figure>
+          <figure><svg width="32" height="32" viewBox="0 0 100 100" style="border-radius:7px"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg>32</figure>
+          <figure><svg width="16" height="16" viewBox="0 0 100 100" style="border-radius:4px"><use href="#tile"/><use href="#markA" style="color:#fff"/></svg>16</figure>
+        </div>
+        <div class="lockups">
+          <div class="lock dark"><svg viewBox="0 0 100 100"><use href="#markA" style="color:#fff"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+          <div class="lock light"><svg viewBox="0 0 100 100"><use href="#markA" style="color:#2B3A44"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pros"><div><h3>優點</h3><ul><li>跟 App 內的版面語言最一致，品牌感最強</li><li>16px 還看得出「一大一小兩顆球」</li></ul></div><div><h3>要注意</h3><ul><li>概念比較抽象，第一次看到不一定聯想到生理期</li><li>細線在 16px 幾乎消失，只剩兩顆球</li></ul></div></div>
+  </section>
+
+  <!-- ===== B ===== -->
+  <section class="concept">
+    <div class="concept-head"><h2>B <b>月相</b></h2><p>Crescent &amp; Prediction：實心月牙是已記錄，虛線補完的圓是預測</p></div>
+    <p class="story">月牙呼應名字裡的「月亮」與每月的週期。實心的部分是已經記錄的日子，虛線把圓補完，代表系統預測的部分，跟 App 日曆裡「實際＝實心、預測＝虛線圈」的規則一樣。<b>讀法：</b>「看得見的是紀錄，虛線是估算」。</p>
+    <div class="row">
+      <div><div class="cell-label">APP ICON</div><div class="big-icon"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markB" style="color:#fff"/></svg></div></div>
+      <div><div class="cell-label">手機主畫面</div>
+        <div class="home"><div class="home-grid">
+          <div class="app"><i></i>相機</div><div class="app"><i></i>天氣</div>
+          <div class="app"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markB" style="color:#fff"/></svg>Luné</div><div class="app"><i></i>行事曆</div>
+          <div class="app"><i></i>備忘錄</div><div class="app"><i></i>音樂</div><div class="app"><i></i>健康</div><div class="app"><i></i>地圖</div>
+        </div><div class="dock"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div>
+        <div class="cell-label">瀏覽器分頁（小尺寸改用淡實線，不用虛線）</div>
+        <div class="tabbar"><div class="tab"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markBsmall" style="color:#fff"/></svg>首頁 · Luné</div><div class="tab off"><span class="g"></span>新分頁</div></div>
+        <div class="urlbar">lune-murex.vercel.app/dashboard</div>
+        <div class="sizes">
+          <figure><svg width="64" height="64" viewBox="0 0 100 100" style="border-radius:14px"><use href="#tile"/><use href="#markB" style="color:#fff"/></svg>64</figure>
+          <figure><svg width="32" height="32" viewBox="0 0 100 100" style="border-radius:7px"><use href="#tile"/><use href="#markBsmall" style="color:#fff"/></svg>32</figure>
+          <figure><svg width="16" height="16" viewBox="0 0 100 100" style="border-radius:4px"><use href="#tile"/><use href="#markBsmall" style="color:#fff"/></svg>16</figure>
+        </div>
+        <div class="lockups">
+          <div class="lock dark"><svg viewBox="0 0 100 100"><use href="#markB" style="color:#fff"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+          <div class="lock light"><svg viewBox="0 0 100 100"><use href="#markB" style="color:#2B3A44"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pros"><div><h3>優點</h3><ul><li>一看就是「月亮」，跟名字直接連結</li><li>實心／虛線的意義跟產品的「實際 vs 預測」一致，有故事可講</li><li>形狀單純，小尺寸辨識度最好</li></ul></div><div><h3>要注意</h3><ul><li>月牙是很常見的圖形（睡眠、夜間模式類 App 也常用），需要靠玫瑰漸層和虛線做出差異</li><li>小尺寸要另一個版本（虛線改淡實線）</li></ul></div></div>
+  </section>
+
+  <!-- ===== C ===== -->
+  <section class="concept">
+    <div class="concept-head"><h2>C <b>週期軌道</b></h2><p>Orbit：手繪感的橢圓是一整個週期，光球是今天</p></div>
+    <p class="story">傾斜的橢圓軌道代表一個完整的週期，玫瑰光球停在軌道上「今天」的位置，小光球是下一次。軌道用跟按鈕一樣的手繪感橢圓，帶一點微光。<b>讀法：</b>「我在這一輪的哪裡」。</p>
+    <div class="row">
+      <div><div class="cell-label">APP ICON</div><div class="big-icon"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg></div></div>
+      <div><div class="cell-label">手機主畫面</div>
+        <div class="home"><div class="home-grid">
+          <div class="app"><i></i>相機</div><div class="app"><i></i>天氣</div>
+          <div class="app"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg>Luné</div><div class="app"><i></i>行事曆</div>
+          <div class="app"><i></i>備忘錄</div><div class="app"><i></i>音樂</div><div class="app"><i></i>健康</div><div class="app"><i></i>地圖</div>
+        </div><div class="dock"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div>
+        <div class="cell-label">瀏覽器分頁</div>
+        <div class="tabbar"><div class="tab"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg>首頁 · Luné</div><div class="tab off"><span class="g"></span>新分頁</div></div>
+        <div class="urlbar">lune-murex.vercel.app/dashboard</div>
+        <div class="sizes">
+          <figure><svg width="64" height="64" viewBox="0 0 100 100" style="border-radius:14px"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg>64</figure>
+          <figure><svg width="32" height="32" viewBox="0 0 100 100" style="border-radius:7px"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg>32</figure>
+          <figure><svg width="16" height="16" viewBox="0 0 100 100" style="border-radius:4px"><use href="#tile"/><use href="#markC" style="color:#fff"/></svg>16</figure>
+        </div>
+        <div class="lockups">
+          <div class="lock dark"><svg viewBox="0 0 100 100"><use href="#markC" style="color:#fff"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+          <div class="lock light"><svg viewBox="0 0 100 100"><use href="#markC" style="color:#2B3A44"/></svg><div><div class="word">Luné</div><div class="tagline">輕輕記下，慢慢看懂自己</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pros"><div><h3>優點</h3><ul><li>「循環」的意思最直接，適合週期類產品</li><li>手繪感的橢圓跟 App 裡的按鈕是同一套語言</li></ul></div><div><h3>要注意</h3><ul><li>軌道＋光球容易讓人聯想到行星或太空主題</li><li>16px 時軌道變成一個圈，細節會消失</li></ul></div></div>
+  </section>
+
+  <!-- ===== D ===== -->
+  <section class="concept">
+    <div class="concept-head"><h2>D <b>é 字標</b></h2><p>Accent Constellation：é 的重音符號換成光球與細線</p></div>
+    <p class="story">以字為主：把「Luné」最特別的 é 拿出來當圖示，重音符號換成一顆玫瑰光球，用細線連到一顆小點，像一個小小的星座。字標也改成小寫的「luné」，語氣比較輕。<b>讀法：</b>「名字就是標誌」。</p>
+    <div class="row">
+      <div><div class="cell-label">APP ICON</div><div class="big-icon"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg></div></div>
+      <div><div class="cell-label">手機主畫面</div>
+        <div class="home"><div class="home-grid">
+          <div class="app"><i></i>相機</div><div class="app"><i></i>天氣</div>
+          <div class="app"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg>Luné</div><div class="app"><i></i>行事曆</div>
+          <div class="app"><i></i>備忘錄</div><div class="app"><i></i>音樂</div><div class="app"><i></i>健康</div><div class="app"><i></i>地圖</div>
+        </div><div class="dock"><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div>
+        <div class="cell-label">瀏覽器分頁</div>
+        <div class="tabbar"><div class="tab"><svg viewBox="0 0 100 100"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg>首頁 · Luné</div><div class="tab off"><span class="g"></span>新分頁</div></div>
+        <div class="urlbar">lune-murex.vercel.app/dashboard</div>
+        <div class="sizes">
+          <figure><svg width="64" height="64" viewBox="0 0 100 100" style="border-radius:14px"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg>64</figure>
+          <figure><svg width="32" height="32" viewBox="0 0 100 100" style="border-radius:7px"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg>32</figure>
+          <figure><svg width="16" height="16" viewBox="0 0 100 100" style="border-radius:4px"><use href="#tile"/><use href="#markD" style="color:#fff"/></svg>16</figure>
+        </div>
+        <div class="lockups">
+          <div class="lock dark">
+            <svg viewBox="0 0 220 100" style="width:150px;height:68px">
+              <text x="0" y="78" font-family="Outfit" font-weight="300" font-size="74" letter-spacing="5" fill="#fff">lun</text>
+              <use href="#markD" x="92" y="0" width="100" height="100" style="color:#fff"/>
+            </svg>
+            <div class="tagline" style="margin-top:0">輕輕記下，<br>慢慢看懂自己</div>
+          </div>
+          <div class="lock light">
+            <svg viewBox="0 0 220 100" style="width:150px;height:68px">
+              <text x="0" y="78" font-family="Outfit" font-weight="300" font-size="74" letter-spacing="5" fill="#2B3A44">lun</text>
+              <use href="#markD" x="92" y="0" width="100" height="100" style="color:#2B3A44"/>
+            </svg>
+            <div class="tagline" style="margin-top:0">輕輕記下，<br>慢慢看懂自己</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pros"><div><h3>優點</h3><ul><li>名字和圖示是同一個東西，好記</li><li>不受圖形慣例限制，跟同類 App 的差異最大</li></ul></div><div><h3>要注意</h3><ul><li>字母做圖示，第一眼比較像字型或文字工具</li><li>正式版要把字轉成路徑（不依賴字型），字距要手調</li></ul></div></div>
+  </section>
+
+  <section class="common">
+    <h2>COMMON</h2>
+    <ul>
+      <li>四個方向都用同一組元素：霧藍底、玫瑰光球、檸檬薄荷小光球、細白線。換方向不需要改 App 的視覺。</li>
+      <li>字標統一用 Outfit 300、寬字距；標語「輕輕記下，慢慢看懂自己」沿用登入頁。</li>
+      <li>定案後的產出：
+        <ul>
+          <li>App 圖示 SVG／PNG（含 iOS 180px、Android 192／512px、可裁切成圓形的 maskable 版本）；</li>
+          <li>favicon；</li>
+          <li>PWA manifest（可加到手機主畫面）；</li>
+          <li>分享預覽圖（1200×630）；</li>
+          <li>頁面上的 logo 元件；</li>
+          <li><code>docs/brand-guidelines.md</code>（語氣、配色、字型、logo 使用規則），向量檔放在 <code>docs/brand/</code>。</li>
+        </ul>
+      </li>
+      <li>也可以混搭，例如 B 的月牙配 D 的小寫字標。</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>

@@ -32,7 +32,11 @@
 
 /* 顆粒雜訊（SVG feTurbulence），疊在整個畫面上 */
 :root {
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  /*
+   * 灰階顆粒雜訊，用柔光疊在整個畫面上。實測在深色底上仍會把底色平均提亮約 8 階
+   * （柔光在暗色上「變亮」的幅度大於「變暗」），所以 body 的底層漸層刻意調深來抵消，見下方 body。
+   */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0  .33 .33 .33 0 0  .33 .33 .33 0 0  0 0 0 0 .55'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   color-scheme: dark;
 }
 
@@ -44,9 +48,14 @@ body {
   color: var(--color-ink);
   font-family: var(--font-tc);
   -webkit-font-smoothing: antialiased;
+  /*
+   * 文字的底色「畫出來」不能淺於 #477A92（白字 4.7:1）。上面還疊了顆粒雜訊（柔光，會提亮約 8 階），
+   * 所以底層漸層刻意調深：#40728A → #3A687E，疊完實測頂端約 #487890（4.8:1）、底部 5.5:1。
+   * 霧氣只放在右上角（那裡只有深色玻璃底的 Profile 切換器），而且很淡。
+   */
   background:
-    radial-gradient(120% 50% at 15% 0%, rgb(150 192 210 / 0.5), transparent 62%),
-    linear-gradient(180deg, var(--color-sky-mid) 0%, var(--color-sky) 45%, var(--color-sky-deep) 100%);
+    radial-gradient(70% 38% at 92% 0%, rgb(150 192 210 / 0.3), transparent 65%),
+    linear-gradient(180deg, #40728a 0%, #40728a 40%, #3a687e 100%);
   background-attachment: fixed;
 }
 
@@ -61,14 +70,14 @@ body::after {
 body::before {
   z-index: 0;
   background:
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 5px);
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.022) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 5px);
 }
 body::after {
   z-index: 60;
   background-image: var(--grain);
   mix-blend-mode: soft-light;
-  opacity: 0.5;
+  opacity: 0.35;
 }
 
 /*
@@ -101,9 +110,9 @@ body::after {
     letter-spacing: 0.22em;
   }
 
-  /* 玻璃面板 */
+  /* 玻璃面板：填色偏深（白色填色會把底色提亮、讓白字對比掉到 4 以下），靠淡白邊框＋背景模糊做出玻璃感 */
   .glass {
-    background: var(--color-glass);
+    background: rgb(28 58 74 / 0.16);
     border: 1px solid var(--color-glass-line);
     border-radius: var(--radius-glass);
     -webkit-backdrop-filter: blur(12px);
@@ -130,9 +139,10 @@ body::after {
     font-weight: 500;
     letter-spacing: 0.14em;
     text-align: center;
+    /* 內側微光要淡：太亮會讓按鈕文字的底色變淺 */
     box-shadow:
       0 0 12px rgb(255 255 255 / 0.5),
-      inset 0 0 14px rgb(255 255 255 / 0.28);
+      inset 0 0 12px rgb(255 255 255 / 0.12);
     transition:
       box-shadow 0.25s var(--ease-soft),
       background-color 0.25s var(--ease-soft),
@@ -140,10 +150,10 @@ body::after {
     cursor: pointer;
   }
   .oval:hover {
-    background-color: rgb(255 255 255 / 0.08);
+    background-color: rgb(28 58 74 / 0.12);
     box-shadow:
       0 0 18px rgb(255 255 255 / 0.65),
-      inset 0 0 16px rgb(255 255 255 / 0.35);
+      inset 0 0 14px rgb(255 255 255 / 0.16);
   }
   .oval:active {
     transform: scale(0.97);
@@ -297,7 +307,7 @@ body::after {
     box-shadow:
       inset -8px -12px 26px rgb(255 255 255 / 0.28),
       inset 6px 8px 18px rgb(255 255 255 / 0.18),
-      0 0 28px rgb(255 255 255 / 0.22);
+      0 0 18px rgb(255 255 255 / 0.16);
   }
   .orb-rose {
     background:
@@ -345,7 +355,7 @@ body::after {
   /* 預測的光球：虛線圈＋淡粉 */
   .orb-predicted {
     border: 1.5px dashed rgb(255 255 255 / 0.95);
-    background: rgb(246 183 196 / 0.22);
+    background: rgb(246 183 196 / 0.05);
   }
 
   /* 日期上的標記（ 跟光球 ）*/

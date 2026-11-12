@@ -4,6 +4,7 @@ import { MobileNav, SideNav } from "@/components/layout/nav";
 import { ProfileSwitcher } from "@/components/layout/profile-switcher";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { RecordProvider } from "@/components/logs/record-provider";
+import { BrandLockup } from "@/components/ui/brand-mark";
 import { Icon } from "@/components/ui/icon";
 import { ToastProvider } from "@/components/ui/toast";
 import { requireUser } from "@/lib/auth/session";
@@ -31,8 +32,8 @@ export default async function MainLayout({ children }: LayoutProps<"/">) {
       <RecordProvider profileId={profile.id} today={today}>
         <div className="relative z-[1] flex min-h-dvh w-full overflow-x-clip">
           <aside className="sticky top-0 z-40 hidden h-dvh w-64 flex-none flex-col gap-10 px-6 py-8 lg:flex">
-            <Link href="/dashboard" className="logo px-4">
-              Luné
+            <Link href="/dashboard" className="px-4" aria-label="Luné 首頁">
+              <BrandLockup size={30} idPrefix="side" />
             </Link>
             <SideNav />
             <div className="mt-auto px-4 text-xs tracking-wider text-ink-soft">
@@ -47,9 +48,10 @@ export default async function MainLayout({ children }: LayoutProps<"/">) {
           </aside>
 
           <div className="min-w-0 flex-1">
-            <header className="topbar-fade sticky top-0 z-30 flex h-[72px] items-center justify-between px-5 pt-2 lg:px-10">
-              <Link href="/dashboard" className="logo lg:invisible">
-                Luné
+            {/* iOS 加到主畫面後狀態列是半透明的（black-translucent）：頁首要讓出 safe-area-inset-top */}
+            <header className="topbar-fade sticky top-0 z-30 flex h-[calc(64px+max(0.5rem,env(safe-area-inset-top)))] items-center justify-between px-5 pt-[max(0.5rem,env(safe-area-inset-top))] lg:px-10">
+              <Link href="/dashboard" className="lg:invisible" aria-label="Luné 首頁">
+                <BrandLockup size={28} idPrefix="top" />
               </Link>
               <ProfileSwitcher current={profile} profiles={profiles} />
             </header>

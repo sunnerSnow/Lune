@@ -73,7 +73,14 @@ function Thread({ side, dashed, edge }: { side: "left" | "right"; dashed: boolea
       className={cx(
         "pointer-events-none absolute top-[21px] z-0 border-t border-white/70",
         dashed && "border-dashed",
-        side === "left" ? (edge ? "-left-3 right-1/2" : "left-0 right-1/2") : edge ? "left-1/2 -right-3" : "left-1/2 right-0",
+        // 線只畫在圓圈之間（圓半徑 18px），不穿過圓圈裡的數字
+        side === "left"
+          ? edge
+            ? "-left-3 right-[calc(50%+18px)]"
+            : "left-0 right-[calc(50%+18px)]"
+          : edge
+            ? "left-[calc(50%+18px)] -right-3"
+            : "left-[calc(50%+18px)] right-0",
       )}
     />
   );
@@ -101,7 +108,6 @@ function DayCell({ m, ym, selected }: { m: DayMarks; ym: string; selected: boole
       className={cx(
         "relative z-[1] mx-auto grid h-11 w-full max-w-12 place-items-center rounded-2xl transition-colors",
         selected ? "bg-white/16" : "hover:bg-white/8",
-        !m.inMonth && "opacity-45",
       )}
     >
       {m.period && <Orb color="rose" glow className="absolute top-[3px] size-9" />}
@@ -112,9 +118,11 @@ function DayCell({ m, ym, selected }: { m: DayMarks; ym: string; selected: boole
           className="absolute top-[3px] size-9 rounded-full border-[1.5px] border-white shadow-[0_0_10px_rgb(255_255_255/0.6)]"
         />
       )}
+      {/* 非本月的日子：字小一號、字重較細來區分，不用變淡（變淡會讓白字對比掉到 3:1） */}
       <span
         className={cx(
-          "font-en relative text-[15px]",
+          "font-en relative",
+          m.inMonth ? "text-[15px]" : "text-[12.5px] font-light",
           m.period && "font-medium text-orb-ink",
           !m.period && !m.predictedPeriod && m.predictedWindow && "underline decoration-dotted decoration-2 underline-offset-[5px]",
         )}

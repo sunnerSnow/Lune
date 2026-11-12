@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- 分享預覽圖（1200×630）的版面；scripts/build-brand.mjs 會把組合標誌塞進 #lockup 再截圖 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../src/app/fonts/noto-sans-tc/noto-sans-tc.css" />
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative; color: #fff; font-family: "Noto Sans TC", sans-serif;
+    background:
+      radial-gradient(120% 60% at 15% 0%, rgba(150, 192, 210, .55), transparent 62%),
+      linear-gradient(180deg, #4E849C 0%, #477A92 45%, #3F6F86 100%);
+  }
+  .orb { position: absolute; border-radius: 50%;
+    -webkit-mask-image: radial-gradient(circle, #000 60%, transparent 71%); mask-image: radial-gradient(circle, #000 60%, transparent 71%); }
+  .rose { background: radial-gradient(circle at 70% 30%, #E2506E 0, transparent 44%), radial-gradient(circle at 28% 72%, #F4B49E 0, transparent 52%), radial-gradient(circle at 34% 28%, #EA9CC8 0, transparent 56%), #EE8DA2; }
+  .lav { background: radial-gradient(circle at 40% 62%, #C799DD 0, transparent 40%), radial-gradient(circle at 70% 30%, #86C1E6 0, transparent 52%), radial-gradient(circle at 25% 25%, #A9B3EC 0, transparent 55%), #98ADE3; }
+  .sage { background: radial-gradient(circle at 62% 46%, #9FDDB4 0, transparent 40%), radial-gradient(circle at 30% 30%, #F4F2C2 0, transparent 55%), radial-gradient(circle at 70% 80%, #E1E07F 0, transparent 55%), #E8E89C; }
+  svg.lines { position: absolute; inset: 0; }
+  /* 組合標誌寬 600 → 字標從 600 × 122 / 274.6 ≈ 267px 處開始；標語與字標左緣對齊 */
+  #lockup { position: absolute; left: 290px; top: 150px; width: 600px; }
+  #lockup svg { width: 100%; height: auto; display: block; }
+  .tag { position: absolute; left: 560px; top: 356px; font-size: 28px; letter-spacing: .3em; font-weight: 500; }
+  .sub { position: absolute; left: 561px; top: 408px; font-size: 19px; letter-spacing: .2em; opacity: .88; }
+</style>
+</head>
+<body>
+  <svg class="lines" viewBox="0 0 1200 630" fill="none">
+    <g stroke="rgba(255,255,255,.4)" stroke-width="1.5">
+      <path d="M120 -10 L300 210" /><path d="M980 120 L1210 40" /><path d="M960 520 L1120 640" />
+    </g>
+  </svg>
+  <div class="orb rose" style="left:-160px;top:300px;width:460px;height:460px;opacity:.9"></div>
+  <div class="orb sage" style="left:1000px;top:60px;width:150px;height:150px;opacity:.85"></div>
+  <div class="orb lav" style="left:1010px;top:480px;width:200px;height:200px;opacity:.7"></div>
+  <div id="lockup"></div>
+  <div class="tag">輕輕記下，慢慢看懂自己</div>
+  <div class="sub">生理週期與身體狀態紀錄</div>
+</body>
+</html>

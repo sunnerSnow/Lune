@@ -8,14 +8,14 @@ export const profileInputSchema = z.object({
   defaultCycleLength: z
     .number("週期長度要是數字")
     .int("週期長度要是整數")
-    .min(15, "週期長度需介於 15–90 天")
-    .max(90, "週期長度需介於 15–90 天")
+    .min(15, "週期長度要在 15–90 天之間")
+    .max(90, "週期長度要在 15–90 天之間")
     .nullish(),
   defaultPeriodLength: z
     .number("經期天數要是數字")
     .int("經期天數要是整數")
-    .min(1, "經期天數需介於 1–14 天")
-    .max(14, "經期天數需介於 1–14 天")
+    .min(1, "經期天數要在 1–14 天之間")
+    .max(14, "經期天數要在 1–14 天之間")
     .nullish(),
   predictionEnabled: z.boolean().optional(),
 });

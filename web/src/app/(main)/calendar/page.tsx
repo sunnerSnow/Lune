@@ -62,7 +62,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
         color="sage"
         size={150}
         soft
-        className="animate-float-slow pointer-events-none absolute -top-16 -right-16 opacity-35 blur-[4px]"
+        className="animate-float-slow pointer-events-none absolute -top-24 -right-20 opacity-20 blur-[4px]"
       />
       <PageTitle en="CALENDAR" tc="生理日曆" />
 

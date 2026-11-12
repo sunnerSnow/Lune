@@ -45,7 +45,8 @@ export function Sheet({
     >
       <div
         className="glass-deep flex max-h-[92dvh] flex-col rounded-t-[var(--radius-sheet)] border-b-0 sm:max-h-[86dvh] sm:rounded-[var(--radius-sheet)] sm:border-b"
-        style={{ background: "rgb(78 128 152 / 0.82)" }}
+        // 面板底色要夠深：白字（含 88% 的次要字）在上面要有 4.5:1 以上
+        style={{ background: "rgb(58 104 128 / 0.92)" }}
       >
         <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-white/60 sm:hidden" aria-hidden="true" />
         <div className="flex items-center gap-3 px-5 pt-3 pb-1 sm:pt-5">

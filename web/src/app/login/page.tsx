@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { loginLocalAction } from "@/app/actions";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { Icon } from "@/components/ui/icon";
 import { Orb } from "@/components/ui/orb";
 import { LOCAL_USERS } from "@/lib/auth/local-users";
@@ -19,20 +20,21 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const deleted = (await searchParams).deleted === "1";
 
   return (
-    <main className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col overflow-x-clip px-5 pb-12">
+    <main className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col overflow-x-clip px-5 pt-[env(safe-area-inset-top)] pb-12">
       <div className="relative h-[300px]" aria-hidden="true">
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" fill="none" preserveAspectRatio="none">
           <g stroke="rgb(255 255 255 / 0.5)" strokeWidth="1">
             <path d="M60 -10 L170 150" />
             <path d="M200 160 L380 80" />
-            <path d="M190 170 L120 300" />
+            <path d="M110 190 L30 300" />
           </g>
         </svg>
         <Orb color="rose" size={220} soft className="animate-float-slow absolute top-6 -left-20" />
         <Orb color="sage" size={80} glow className="animate-float absolute top-12 right-6" />
         <Orb color="lavender" size={44} glow className="animate-float-slow absolute top-[128px] right-[30%]" />
       </div>
-      <div className="-mt-28 text-center">
+      <div className="-mt-28 flex flex-col items-center text-center">
+        <BrandMark size={56} idPrefix="login" className="mb-2" />
         <h1 className="logo text-[44px] tracking-[0.2em] drop-shadow-[0_0_24px_rgb(255_255_255/0.45)]">Luné</h1>
         <p className="mt-3 text-[13px] tracking-[0.3em]">輕輕記下，慢慢看懂自己</p>
       </div>

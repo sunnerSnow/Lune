@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="mrA" cx=".7" cy=".3" r=".5"><stop offset="0" stop-color="#E2506E"/><stop offset="1" stop-color="#E2506E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="mrB" cx=".28" cy=".72" r=".55"><stop offset="0" stop-color="#F4B49E"/><stop offset="1" stop-color="#F4B49E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="mrC" cx=".34" cy=".28" r=".56"><stop offset="0" stop-color="#EA9CC8"/><stop offset="1" stop-color="#EA9CC8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="mlA" cx=".62" cy=".46" r=".45"><stop offset="0" stop-color="#9FDDB4"/><stop offset="1" stop-color="#9FDDB4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="mlB" cx=".3" cy=".3" r=".55"><stop offset="0" stop-color="#F7F5CC"/><stop offset="1" stop-color="#F7F5CC" stop-opacity="0"/></radialGradient>
+    <radialGradient id="msh" cx=".34" cy=".28" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><filter id="msoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter>
+  </defs>
+  <g transform="rotate(-22 50 52)"><path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" fill="none" stroke="#2B3A44" stroke-width="6" opacity=".18" filter="url(#msoft)"/>
+       <path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" fill="none" stroke="#2B3A44" stroke-width="2.4" stroke-linecap="round"/></g>
+    <g><circle cx="71" cy="31" r="12.5" fill="#EE8DA2"/><circle cx="71" cy="31" r="12.5" fill="url(#mrC)"/><circle cx="71" cy="31" r="12.5" fill="url(#mrB)"/><circle cx="71" cy="31" r="12.5" fill="url(#mrA)"/><circle cx="71" cy="31" r="12.5" fill="url(#msh)"/></g>
+    <g><circle cx="22" cy="72" r="4.2" fill="#E8E89C"/><circle cx="22" cy="72" r="4.2" fill="url(#mlB)"/><circle cx="22" cy="72" r="4.2" fill="url(#mlA)"/><circle cx="22" cy="72" r="4.2" fill="url(#msh)"/></g>
+</svg>
