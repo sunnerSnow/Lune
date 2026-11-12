@@ -46,6 +46,38 @@ test.describe("示範使用者 A（有範例資料）", () => {
     await expect(sheet.getByRole("button", { name: "無症狀" })).toHaveAttribute("aria-pressed", "false");
   });
 
+  test("分析頁：時間範圍切換，趨勢圖與頻率圖都有表格檢視 @desktop", async ({ page }) => {
+    await loginDemo(page, "A");
+    await page.goto("/analytics?range=12m");
+    await expect(page.getByRole("link", { name: "近 1 年" })).toHaveAttribute("aria-current", "true");
+    await expect(page.getByRole("group", { name: /週期長度趨勢，共 \d+ 個週期/ })).toBeVisible();
+    await expect(page.getByRole("list", { name: "症狀出現天數" }).getByRole("listitem").first()).toBeVisible();
+    const tables = page.getByText("以表格檢視");
+    await expect(tables).toHaveCount(3);
+    await tables.first().click();
+    await expect(page.getByRole("table").first()).toBeVisible();
+  });
+
+  test("匯出：CSV 有 BOM 與中文欄位；.ics 先預覽，檔案裡只有日期與中性名稱", async ({ page }) => {
+    await loginDemo(page, "A");
+    await page.goto("/settings");
+    const csv = page.waitForEvent("download");
+    await page.getByRole("link", { name: /經期紀錄（CSV）/ }).click();
+    const csvText = (await (await (await csv).createReadStream()).toArray()).join("");
+    expect(csvText.startsWith("﻿Profile,開始日期,結束日期,天數,備註")).toBe(true);
+
+    await page.getByRole("button", { name: /預測加入行事曆/ }).click();
+    const sheet = page.getByRole("dialog", { name: "加入行事曆" });
+    await sheet.getByRole("radio", { name: "Luné 提醒" }).click();
+    await expect(sheet.getByRole("region", { name: "預覽" })).toContainText("Luné 提醒");
+    const ics = page.waitForEvent("download");
+    await sheet.getByRole("link", { name: "下載 .ics" }).click();
+    const icsText = (await (await (await ics).createReadStream()).toArray()).join("");
+    expect(icsText).toContain("BEGIN:VEVENT");
+    expect(icsText).toContain("SUMMARY:Luné 提醒");
+    expect(icsText).not.toMatch(/經期|經血|症狀|示範使用者/);
+  });
+
   test("切換 Profile 後首頁資料跟著換", async ({ page }) => {
     await loginDemo(page, "A");
     await expect(page.getByText("週期第 13 天")).toBeVisible();

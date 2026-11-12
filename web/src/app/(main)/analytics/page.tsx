@@ -1,5 +1,16 @@
 import type { Metadata } from "next";
 import { type ConstellationItem, Constellation } from "@/components/analytics/constellation";
+import { TrendsSection } from "@/components/analytics/trends-section";
+import {
+  cycleTrend,
+  DEFAULT_RANGE,
+  isRangeKey,
+  moodCounts,
+  type RangeKey,
+  rangeStart,
+  symptomCounts,
+} from "@/lib/cycle/analytics-series";
+import { listDailyLogs } from "@/lib/services/daily-logs";
 import { warningText } from "@/components/dashboard/notices";
 import { PageTitle } from "@/components/ui/page-title";
 import { requireUser } from "@/lib/auth/session";
@@ -16,11 +27,18 @@ export const metadata: Metadata = { title: "週期分析" };
 const SHOWN = 6;
 
 /** 週期分析：只用個人資料；資料不足就說明，不用不可靠的資料產生看似精確的結論 */
-export default async function AnalyticsPage() {
+export default async function AnalyticsPage({ searchParams }: PageProps<"/analytics">) {
+  const sp = await searchParams;
+  const rangeParam = Array.isArray(sp.range) ? sp.range[0] : sp.range;
+  const range: RangeKey = isRangeKey(rangeParam) ? rangeParam : DEFAULT_RANGE;
   const user = await requireUser();
   const db = await getDb();
   const [profile, today] = await Promise.all([getCurrentProfile(user.id), getToday()]);
-  const periods = await listPeriods(db, user.id, profile.id);
+  const from = rangeStart(range, today);
+  const [periods, logs] = await Promise.all([
+    listPeriods(db, user.id, profile.id),
+    listDailyLogs(db, user.id, profile.id, from, today),
+  ]);
   const analytics = computeAnalytics(periods);
   const summary = computeCycleSummary(periods, profile, today);
 
@@ -114,6 +132,15 @@ export default async function AnalyticsPage() {
           )}
         </section>
       </div>
+
+      <TrendsSection
+        range={range}
+        trend={cycleTrend(periods, from)}
+        average={analytics.averageCycleLength}
+        symptoms={symptomCounts(logs)}
+        moods={moodCounts(logs)}
+        loggedDays={logs.length}
+      />
 
       <p className="mt-8 text-[11px] leading-relaxed tracking-wider text-ink-soft lg:hidden">
         分析只整理你的紀錄，不提供診斷。若出血量、疼痛或週期變化讓你擔心，建議諮詢醫療專業人員；嚴重疼痛、大量出血或暈眩時請立即就醫。

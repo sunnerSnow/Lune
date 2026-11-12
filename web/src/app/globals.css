@@ -24,6 +24,12 @@
   --color-blush: #f6b7c4;
   --color-alert: #ffe3e8;
 
+  /* 圖表（單一系列）：資料用淡粉（對玻璃面板底色 #44728A 驗證過 ≥ 3:1）；文字一律用文字色，不用資料色 */
+  --color-chart: #f6b7c4;
+  --color-chart-grid: rgb(255 255 255 / 0.14);
+  --color-chart-ref: rgb(255 255 255 / 0.6);
+  --color-chart-surface: #44728a;
+
   --radius-glass: 30px;
   --radius-sheet: 34px;
 
