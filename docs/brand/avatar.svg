@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="abg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E93AA"/><stop offset="1" stop-color="#3F6F86"/></linearGradient>
+    <radialGradient id="amist" cx=".18" cy=".05" r=".85"><stop offset="0" stop-color="#A9CCDB" stop-opacity=".6"/><stop offset="1" stop-color="#A9CCDB" stop-opacity="0"/></radialGradient>
+    <radialGradient id="arA" cx=".7" cy=".3" r=".5"><stop offset="0" stop-color="#E2506E"/><stop offset="1" stop-color="#E2506E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="arB" cx=".28" cy=".72" r=".55"><stop offset="0" stop-color="#F4B49E"/><stop offset="1" stop-color="#F4B49E" stop-opacity="0"/></radialGradient>
+    <radialGradient id="arC" cx=".34" cy=".28" r=".56"><stop offset="0" stop-color="#EA9CC8"/><stop offset="1" stop-color="#EA9CC8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="alA" cx=".62" cy=".46" r=".45"><stop offset="0" stop-color="#9FDDB4"/><stop offset="1" stop-color="#9FDDB4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="alB" cx=".3" cy=".3" r=".55"><stop offset="0" stop-color="#F7F5CC"/><stop offset="1" stop-color="#F7F5CC" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ash" cx=".34" cy=".28" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><filter id="asoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter>
+  </defs>
+  <rect width="100" height="100" fill="url(#abg)"/><rect width="100" height="100" fill="url(#amist)"/><g transform="translate(14 14) scale(.72)"><g transform="rotate(-22 50 52)">
+    <path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" fill="none" stroke="#FFFFFF" stroke-width="8" opacity=".18" filter="url(#asoft)"/>
+    <path d="M14 53 C 14 36, 34 28, 52 28.5 C 72 29, 87 39, 86.5 53 C 86 67, 69 75.5, 50 75 C 31 74.5, 14.5 68, 14 53 Z" fill="none" stroke="#FFFFFF" stroke-width="4.2" stroke-linecap="round"/></g>
+    <g><circle cx="71" cy="31" r="14" fill="#EE8DA2"/><circle cx="71" cy="31" r="14" fill="url(#arC)"/><circle cx="71" cy="31" r="14" fill="url(#arB)"/><circle cx="71" cy="31" r="14" fill="url(#arA)"/><circle cx="71" cy="31" r="14" fill="url(#ash)"/></g><g><circle cx="22" cy="72" r="5.4" fill="#E8E89C"/><circle cx="22" cy="72" r="5.4" fill="url(#alB)"/><circle cx="22" cy="72" r="5.4" fill="url(#alA)"/><circle cx="22" cy="72" r="5.4" fill="url(#ash)"/></g></g>
+</svg>

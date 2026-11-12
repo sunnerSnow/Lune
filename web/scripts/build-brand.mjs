@@ -6,6 +6,7 @@
  * 2. 用電腦上的 Chrome（Playwright channel: chrome）轉成 PNG／ICO：
  *    - src/app/icon.svg、src/app/favicon.ico（16／32／48）、src/app/apple-icon.png（180）
  *    - public/icons/icon-192.png、icon-512.png、maskable-512.png（PWA）
+ *    - ../docs/brand/avatar-1024.png（大頭貼，裁成圓形也安全）
  *    - src/app/opengraph-image.png（1200×630，分享預覽）
  *
  * 字標路徑來自 ../docs/brand/wordmark-path.json（scripts/wordmark-path.py 產生，Outfit 300、字距 0.16em）。
@@ -80,6 +81,17 @@ const maskable = svg(
   tileDefs("t") + orbDefs("t") + glowDef("t"),
   `${tile("t")}<g transform="translate(14 14) scale(.72)">${markBody("t", WHITE)}</g>`,
 );
+// 大頭貼：常被裁成圓形、也常縮到 24–40px → 標誌縮在中間安全區；線寬與光球介於一般版和加粗版之間，
+// 放大看不笨重、縮小也看得到軌道
+const avatarBody = `<g transform="rotate(-22 50 52)">
+    <path d="${RING}" fill="none" stroke="${WHITE}" stroke-width="8" opacity=".18" filter="url(#asoft)"/>
+    <path d="${RING}" fill="none" stroke="${WHITE}" stroke-width="4.2" stroke-linecap="round"/></g>
+    ${rose("a", 71, 31, 14)}${lemon("a", 22, 72, 5.4)}`;
+const avatar = svg(
+  "0 0 100 100",
+  tileDefs("a") + orbDefs("a") + glowDef("a"),
+  `${tile("a")}<g transform="translate(14 14) scale(.72)">${avatarBody}</g>`,
+);
 // favicon：小尺寸專用（線粗、光球大、沒有微光）
 const favicon = svg("0 0 100 100", tileDefs("f") + orbDefs("f"), tile("f", 22) + markBody("f", WHITE, { small: true }));
 
@@ -119,6 +131,7 @@ const files = {
   "app-icon-rounded.svg": appIconRounded,
   "app-icon-maskable.svg": maskable,
   "favicon.svg": favicon,
+  "avatar.svg": avatar,
   "wordmark-on-dark.svg": wordmarkSvg(WHITE),
   "wordmark-on-light.svg": wordmarkSvg(INK),
   "lockup-on-dark.svg": lockup(WHITE),
@@ -172,6 +185,8 @@ await renderSvg(appIcon, 180, path.join(WEB, "src", "app", "apple-icon.png"));
 await renderSvg(appIcon, 192, path.join(ICONS, "icon-192.png"));
 await renderSvg(appIcon, 512, path.join(ICONS, "icon-512.png"));
 await renderSvg(maskable, 512, path.join(ICONS, "maskable-512.png"));
+// 大頭貼（GitHub、Vercel、社群帳號）
+await renderSvg(avatar, 1024, path.join(DOCS, "avatar-1024.png"));
 const icoParts = [];
 for (const size of [16, 32, 48]) icoParts.push({ size, buf: await renderSvg(favicon, size, null, { transparent: true }) });
 writeFileSync(path.join(WEB, "src", "app", "favicon.ico"), ico(icoParts));

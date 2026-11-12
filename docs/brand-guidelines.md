@@ -86,6 +86,7 @@
 | `app-icon-rounded.svg` | 圓角版（文件、簡報用） |
 | `app-icon-maskable.svg` | Android 可裁切成圓形的版本（標誌縮在中間 72%） |
 | `favicon.svg` | 16–48px 專用：線條加粗、光球放大、沒有微光 |
+| `avatar.svg`／`avatar-1024.png` | 大頭貼（GitHub、Vercel、社群帳號）：標誌縮在中間安全區，裁成圓形也安全；線寬介於一般版與加粗版之間，縮到 24px 仍看得到軌道 |
 
 網站實際使用的圖示（`web/src/app/icon.svg`、`favicon.ico`、`apple-icon.png`、`opengraph-image.png`、`web/public/icons/*`）全部由 `cd web && node scripts/build-brand.mjs` 產生。標誌的幾何只定義在這支腳本和 `web/src/components/ui/brand-mark.tsx`，兩邊要一起改。字標路徑用 `python scripts/wordmark-path.py <Outfit[wght].ttf>` 重新產生。
 
