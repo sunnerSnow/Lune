@@ -3,11 +3,13 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions";
 import { DeleteAccount } from "@/components/settings/delete-account";
+import { EmailVerification } from "@/components/settings/email-verification";
 import { IcsExport } from "@/components/settings/ics-export";
 import { ProfileManager } from "@/components/settings/profile-manager";
 import { Icon } from "@/components/ui/icon";
 import { PageTitle } from "@/components/ui/page-title";
 import { requireUser } from "@/lib/auth/session";
+import { mailReady } from "@/lib/config";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { computeCycleSummary } from "@/lib/cycle/cycle-predictor";
 import { getDb } from "@/lib/db/client";
@@ -44,9 +46,21 @@ export default async function SettingsPage() {
           <section aria-labelledby="export-title" className="glass px-5 pt-4 pb-3">
             <SectionTitle id="export-title" en="EXPORT" tc="匯出" />
             {/* 一般 <a>：檔案下載，不要讓 Next 預先抓取 */}
-            <DownloadRow href="/api/export" label="下載我的資料（JSON）" note="所有 Profile、經期與每日紀錄，完整備份" />
-            <DownloadRow href="/api/export/csv?kind=periods" label="經期紀錄（CSV）" note="可以用 Excel 或 Google 試算表開" />
-            <DownloadRow href="/api/export/csv?kind=daily-logs" label="每日紀錄（CSV）" note="經血量、症狀、心情、備註" />
+            <DownloadRow
+              href="/api/export"
+              label="下載我的資料（JSON）"
+              note="所有 Profile、經期與每日紀錄，完整備份"
+            />
+            <DownloadRow
+              href="/api/export/csv?kind=periods"
+              label="經期紀錄（CSV）"
+              note="可以用 Excel 或 Google 試算表開"
+            />
+            <DownloadRow
+              href="/api/export/csv?kind=daily-logs"
+              label="每日紀錄（CSV）"
+              note="經血量、症狀、心情、備註"
+            />
             <IcsExport
               profileName={profile.displayName}
               range={prediction ? { windowStart: prediction.windowStart, windowEnd: prediction.windowEnd } : null}
@@ -57,9 +71,21 @@ export default async function SettingsPage() {
         <div className="flex flex-col gap-6">
           <section aria-labelledby="account-title" className="glass px-5 pt-4 pb-3">
             <SectionTitle id="account-title" en="ACCOUNT" tc="帳號" />
-            <p className="border-t border-line py-3 text-sm tracking-wider break-all">{user.email}</p>
+            <p className="flex items-center justify-between gap-3 border-t border-line py-3 text-sm tracking-wider">
+              <span className="break-all">{user.email}</span>
+              {user.emailVerified && (
+                <span className="flex flex-none items-center gap-1 text-xs tracking-[0.14em] text-ink-soft">
+                  <Icon name="check" size={14} />
+                  已驗證
+                </span>
+              )}
+            </p>
+            {!user.emailVerified && mailReady() && <EmailVerification />}
             <form action={logoutAction} className="border-t border-line">
-              <button type="submit" className="flex min-h-12 w-full items-center justify-between text-sm tracking-[0.14em]">
+              <button
+                type="submit"
+                className="flex min-h-12 w-full items-center justify-between text-sm tracking-[0.14em]"
+              >
                 登出
                 <span className="circle-btn sm" aria-hidden="true">
                   <Icon name="logout" size={16} />
@@ -102,7 +128,11 @@ function SectionTitle({ id, en, tc }: { id: string; en: string; tc: string }) {
 
 function DownloadRow({ href, label, note }: { href: string; label: string; note: ReactNode }) {
   return (
-    <a href={href} download className="flex min-h-12 items-center justify-between gap-3 border-t border-line py-1.5 text-sm tracking-[0.14em]">
+    <a
+      href={href}
+      download
+      className="flex min-h-12 items-center justify-between gap-3 border-t border-line py-1.5 text-sm tracking-[0.14em]"
+    >
       <span>
         {label}
         <span className="mt-0.5 block text-xs tracking-wider text-ink-soft">{note}</span>

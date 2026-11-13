@@ -38,7 +38,7 @@ npm run dev          # http://localhost:3000
 
 | 指令 | 用途 |
 | --- | --- |
-| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離、限流、匯出、刪除帳號） |
+| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離、限流、匯出、刪除帳號、Email 驗證與重設密碼） |
 | `npm run test:e2e` | Playwright：先建置，再以本機示範模式（記憶體 PGlite）跑手機＋桌面的端對端測試；用電腦上的 Chrome。剛建置過可設 `E2E_SKIP_BUILD=1` 跳過建置 |
 | `npm run typecheck` | 產生路由型別後跑 tsc |
 | `npm run lint` | ESLint |
@@ -56,6 +56,10 @@ npm run dev          # http://localhost:3000
 - `BETTER_AUTH_SECRET`：至少 32 個字元
 - `BETTER_AUTH_URL`：網站網址
 - `LUNE_CONTACT_EMAIL`：隱私權政策與使用條款上的聯絡信箱（沒設會顯示「尚未設定」）
+- `MAIL_PROVIDER=gmail`、`GMAIL_USER`、`GMAIL_APP_PASSWORD`：寄 Email 驗證信與重設密碼信。沒設就不開放忘記密碼與 Email 驗證，登入頁也不會出現「忘記密碼？」。
+  - `GMAIL_APP_PASSWORD` 是 Google 帳號的「應用程式密碼」，不是登入密碼；要先開啟兩步驟驗證才能建立。
+  - `next dev` 沒設 `MAIL_PROVIDER` 時用 `log`：不寄信，把整封信印在終端機。部署環境不允許 `log`。
+- `AUTH_REQUIRE_EMAIL_VERIFICATION=1`（選填）：註冊後要先驗證 Email 才能登入。預設關閉：註冊直接登入，同時寄一封驗證信，設定頁可以重寄。
 
 部署在 Vercel 時，沒有 `DATABASE_URL` 會直接報錯；就算設了 `LUNE_LOCAL_MODE`，也不會進入本機示範模式。示範模式有寫死密碼的帳號，不能出現在公開網站。
 
@@ -73,6 +77,10 @@ npm run dev          # http://localhost:3000
   | `BETTER_AUTH_SECRET` | 至少 32 個字元 |
   | `BETTER_AUTH_URL` | 正式網址，結尾不加 `/` |
   | `LUNE_CONTACT_EMAIL` | 隱私權政策與使用條款上的聯絡信箱 |
+  | `MAIL_PROVIDER` | `gmail` |
+  | `GMAIL_USER` | 寄件的 Gmail 地址 |
+  | `GMAIL_APP_PASSWORD` | 這個 Gmail 的應用程式密碼（16 個字母，有沒有空白都可以） |
+  | `AUTH_REQUIRE_EMAIL_VERIFICATION` | 選填，`1` 表示要先驗證 Email 才能登入 |
 
   - **Preview 不要填正式資料庫的連線字串**：不然任何預覽網址都能讀寫正式使用者的健康紀錄。沒設資料庫時，Preview 部署可以建置，但頁面會直接報錯。需要預覽時，另外開一個 Neon branch，給 Preview 用它的連線字串和一組不同的密鑰。
   - 不要設 `LUNE_LOCAL_MODE`。`DATABASE_URL_UNPOOLED` 只有本機跑 migration 時用得到。
@@ -101,6 +109,7 @@ web/
       validation/         zod 驗證（前後端共用）
       db/                 連線、schema、withUser
       auth/               Better Auth、session、示範使用者
+      mail.ts             寄信（Gmail SMTP）、寄信額度、信件內容
   tests/                  Vitest（純函式＋PGlite 整合）
   e2e/                    Playwright 端對端測試（手機＋桌面）
 ```
@@ -187,7 +196,13 @@ web/
   - 同一帳號所有來源合計失敗，每小時 50 次。
 
   別人猜錯密碼，不會鎖住你從自己的裝置登入。刪除帳號時輸入的密碼也套用同一套限制。
-- **已知取捨**：註冊時會告知「Email 已註冊」。沒有寄信驗證的流程，就無法完全避免有人藉此查出某個 Email 有沒有註冊；目前靠 IP 限流降低大量探測。之後接上寄信服務時，改成「一律回覆已寄出驗證信」。
+- **寄信**（`web/src/lib/mail.ts`，Gmail SMTP）：只寄 Email 驗證、重設密碼、「這個 Email 已經註冊過」三種純文字信，不放任何健康紀錄。
+  - 信裡的連結用設定的網址組成（`BETTER_AUTH_URL`），不看請求的 Host 標頭，避免 token 被導到別的網域。
+  - 連結打開後要按頁面上的按鈕才會用掉 token，信箱的連結預覽不會把它用掉。重設密碼連結 30 分鐘有效，驗證連結 24 小時。
+  - 信在回應送出後才寄：帳號存不存在，回應時間都一樣。忘記密碼一律回「如果有註冊，信已寄出」。
+  - 額度：同一個收件者每小時 5 封、全站每天 300 封（Gmail 個人帳號一天約 500 封上限）。
+  - 重設密碼成功後，所有裝置的登入都會失效。
+- **已知取捨**：預設不要求驗證 Email，註冊時會告知「Email 已註冊」，有人可以藉此查出某個 Email 有沒有註冊，目前靠限流降低大量探測。設 `AUTH_REQUIRE_EMAIL_VERIFICATION=1` 後改成一律回「請收信」，已註冊的 Email 改寄通知給本人。
 - **安全標頭**（`web/next.config.ts`）：
   - `X-Frame-Options: DENY` 與 `frame-ancestors 'none'`：不能被其他網站嵌入；
   - `nosniff`、`Referrer-Policy: same-origin`、`Permissions-Policy`；

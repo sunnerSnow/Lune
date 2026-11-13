@@ -22,6 +22,7 @@ const PATHS = {
   stop: "M7 7h10v10H7z",
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20a7 7 0 0 1 14 0",
   archive: "M4 7h16v3H4zM6 10v9h12v-9M10 14h4",
+  mail: "M4 7.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9ZM4.5 7l7.5 5.5L19.5 7",
 } as const;
 
 export type IconName = keyof typeof PATHS;

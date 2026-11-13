@@ -8,6 +8,7 @@ export interface SessionUser {
   id: string;
   email: string | null;
   name: string | null;
+  emailVerified: boolean;
 }
 
 /**
@@ -21,7 +22,12 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const auth = await getAuth();
   const result = await auth.api.getSession({ headers: requestHeaders });
   if (!result?.user) return null;
-  return { id: result.user.id, email: result.user.email ?? null, name: result.user.name ?? null };
+  return {
+    id: result.user.id,
+    email: result.user.email ?? null,
+    name: result.user.name ?? null,
+    emailVerified: result.user.emailVerified === true,
+  };
 });
 
 export async function requireUser(): Promise<SessionUser> {

@@ -1,5 +1,5 @@
 /** 隱私權政策與使用條款的共用資訊 */
-export const LEGAL_UPDATED_AT = "2026 年 11 月 11 日";
+export const LEGAL_UPDATED_AT = "2026 年 11 月 12 日";
 
 /**
  * 聯絡方式由部署環境的 LUNE_CONTACT_EMAIL 提供（不把個人信箱寫進程式碼）。

@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
   cacheComponents: false,
   // 家目錄與上層資料夾另有 lockfile，明確指定根目錄避免 Next 誤判 monorepo
   outputFileTracingRoot: import.meta.dirname,
-  // PGlite 會在執行時載入 WASM 與資料檔，postgres 是原生 TCP 驅動，都不要被打包
-  serverExternalPackages: ["@electric-sql/pglite", "postgres"],
+  // PGlite 會在執行時載入 WASM 與資料檔，postgres、nodemailer 直接用 Node 的 TCP／TLS，都不要被打包
+  serverExternalPackages: ["@electric-sql/pglite", "postgres", "nodemailer"],
   turbopack: {
     root: import.meta.dirname,
     rules: {

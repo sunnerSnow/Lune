@@ -7,17 +7,26 @@ import { Icon } from "@/components/ui/icon";
 import { Orb } from "@/components/ui/orb";
 import { LOCAL_USERS } from "@/lib/auth/local-users";
 import { getSessionUser } from "@/lib/auth/session";
-import { isLocalMode, isLocalModeInProduction } from "@/lib/config";
+import { isLocalMode, isLocalModeInProduction, mailReady } from "@/lib/config";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "登入" };
+
+/** 網址帶的提示（?notice=…、?deleted=1）→ 顯示在表單上方的訊息 */
+const NOTICES: Record<string, string> = {
+  "check-mail": "請到信箱收信，點信裡的連結完成註冊。幾分鐘內沒收到的話，看看垃圾郵件匣。",
+  reset: "密碼已經更新，請用新密碼登入。",
+  deleted: "帳號與所有資料已刪除。",
+};
 
 /** 登入頁：漂浮光球＋細線，中間是品牌字；表單放在玻璃面板 */
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (await getSessionUser()) redirect("/dashboard");
   const local = isLocalMode();
   const localInProduction = isLocalModeInProduction();
-  const deleted = (await searchParams).deleted === "1";
+  const params = await searchParams;
+  const noticeKey = params.deleted === "1" ? "deleted" : typeof params.notice === "string" ? params.notice : "";
+  const notice = Object.hasOwn(NOTICES, noticeKey) ? NOTICES[noticeKey] : null;
 
   return (
     <main className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-md flex-col overflow-x-clip px-5 pt-[env(safe-area-inset-top)] pb-12">
@@ -39,9 +48,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <p className="mt-3 text-[13px] tracking-[0.3em]">輕輕記下，慢慢看懂自己</p>
       </div>
 
-      {deleted && (
-        <p role="status" className="glass-deep mt-8 rounded-[20px] px-5 py-3 text-center text-sm tracking-wider">
-          帳號與所有資料已刪除。
+      {notice && (
+        <p
+          role="status"
+          className="glass-deep mt-8 rounded-[20px] px-5 py-3 text-center text-sm leading-relaxed tracking-wider"
+        >
+          {notice}
         </p>
       )}
 
@@ -72,7 +84,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       )}
 
       <section aria-label="登入或註冊" className="glass mt-5 px-5 pt-5 pb-6">
-        <LoginForm />
+        <LoginForm canResetPassword={mailReady()} />
       </section>
       <p className="mt-5 text-center text-[11px] leading-relaxed tracking-wider text-ink-soft">
         Luné 只協助記錄與估算，不提供醫療診斷；預測不可作為避孕依據。

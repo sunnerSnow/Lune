@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { type FormEvent, useId, useState, useTransition } from "react";
 import { type AuthState, loginAction } from "@/app/actions";
 import { Icon } from "@/components/ui/icon";
 import { credentialsSchema } from "@/lib/validation/auth";
 
 /** 登入／註冊（同一個表單切換）；前端先驗證一次，伺服器再驗證一次 */
-export function LoginForm() {
+export function LoginForm({ canResetPassword = false }: { canResetPassword?: boolean }) {
   const id = useId();
   const [intent, setIntent] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -109,6 +110,16 @@ export function LoginForm() {
           className="field-input"
         />
         {fieldError("password") && <p className="field-error">{fieldError("password")}</p>}
+        {intent === "signin" && canResetPassword && (
+          <p className="mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="inline-flex min-h-11 items-center text-xs tracking-[0.14em] text-ink-soft underline underline-offset-4 hover:text-white"
+            >
+              忘記密碼？
+            </Link>
+          </p>
+        )}
       </div>
       <div className="mt-6 flex justify-center">
         <button type="submit" disabled={pending} className="oval h-16 w-48 text-base">

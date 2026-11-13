@@ -39,6 +39,10 @@ export default defineConfig({
       PGLITE_DATA_DIR: "memory://",
       BETTER_AUTH_SECRET: "e2e-only-secret-not-for-production-0123456789",
       BETTER_AUTH_URL: `http://localhost:${PORT}`,
+      // 信印在伺服器輸出、不真的寄出；打開忘記密碼與 Email 驗證的畫面
+      MAIL_PROVIDER: "log",
+      GMAIL_USER: "",
+      GMAIL_APP_PASSWORD: "",
     },
   },
 });

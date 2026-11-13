@@ -21,6 +21,35 @@ test.describe("未登入", () => {
     const exp = await request.get("/api/export", { maxRedirects: 0 });
     expect([302, 307, 401]).toContain(exp.status());
   });
+
+  test("忘記密碼不透露帳號是否存在；重設密碼與驗證 Email 的連結無效時會說明", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("link", { name: "忘記密碼？" }).click();
+    await expect(page).toHaveURL(/\/forgot-password$/);
+    await page.getByLabel("Email").fill("nobody@example.test");
+    await page.getByRole("button", { name: "寄出重設連結" }).click();
+    await expect(page.getByRole("status")).toContainText("如果這個 Email 有註冊 Luné");
+
+    await page.goto("/reset-password");
+    await expect(page.getByRole("status")).toContainText("連結不完整");
+    await page.goto("/reset-password?token=not-a-real-token");
+    await page.getByLabel(/^新密碼/).fill("new-password-123");
+    await page.getByLabel("再輸入一次新密碼").fill("new-password-456");
+    await page.getByRole("button", { name: "更新密碼" }).click();
+    // Next 的路由播報也是 role=alert，所以依文字找
+    await expect(page.getByRole("alert").filter({ hasText: "兩次輸入的密碼不一樣" })).toBeVisible();
+    await page.getByLabel("再輸入一次新密碼").fill("new-password-123");
+    await page.getByRole("button", { name: "更新密碼" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "失效" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "重新申請" })).toHaveAttribute("href", "/forgot-password");
+
+    await page.goto("/verify-email?token=not-a-real-token");
+    await page.getByRole("button", { name: "完成驗證" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "失效" })).toBeVisible();
+
+    await page.goto("/login?notice=check-mail");
+    await expect(page.getByRole("status")).toContainText("請到信箱收信");
+  });
 });
 
 // 示範使用者在手機與桌面兩組測試間共用同一份資料：這裡只讀，不寫入
@@ -162,9 +191,13 @@ test.describe("全新帳號", () => {
     await expect(sheet.getByRole("alert")).toContainText("重疊");
   });
 
-  test("新增 Profile、匯出 JSON、刪除帳號（密碼錯誤先被擋）", async ({ page }) => {
+  test("重寄驗證信、新增 Profile、匯出 JSON、刪除帳號（密碼錯誤先被擋）", async ({ page }) => {
     const { email, password } = await registerFresh(page, "本人");
     await page.goto("/settings");
+    // e2e 的寄信是 log 模式：新帳號還沒驗證，可以重寄
+    await page.getByRole("button", { name: /Email 還沒驗證/ }).click();
+    await expect(page.getByRole("status").filter({ hasText: "驗證信已寄出" })).toBeVisible();
+
     await page.getByRole("button", { name: "新增 Profile" }).click();
     const sheet = page.getByRole("dialog");
     await sheet.getByLabel("顯示名稱").fill("妹妹");
