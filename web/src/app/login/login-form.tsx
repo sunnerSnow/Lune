@@ -110,22 +110,23 @@ export function LoginForm({ canResetPassword = false }: { canResetPassword?: boo
           className="field-input"
         />
         {fieldError("password") && <p className="field-error">{fieldError("password")}</p>}
-        {intent === "signin" && canResetPassword && (
-          <p className="mt-2 text-right">
-            <Link
-              href="/forgot-password"
-              className="inline-flex min-h-11 items-center text-xs tracking-[0.14em] text-ink-soft underline underline-offset-4 hover:text-white"
-            >
-              忘記密碼？
-            </Link>
-          </p>
-        )}
       </div>
       <div className="mt-6 flex justify-center">
         <button type="submit" disabled={pending} className="oval h-16 w-48 text-base">
           {pending ? "處理中…" : intent === "signup" ? "建立帳號" : "登入"}
         </button>
       </div>
+      {/* 放在登入按鈕正下方、置中、白字：靠右的小字容易被略過 */}
+      {intent === "signin" && canResetPassword && (
+        <p className="mt-3 text-center">
+          <Link
+            href="/forgot-password"
+            className="inline-flex min-h-11 items-center px-3 text-[13px] tracking-[0.16em] text-white underline underline-offset-4 hover:decoration-2"
+          >
+            忘記密碼？
+          </Link>
+        </p>
+      )}
     </form>
   );
 }

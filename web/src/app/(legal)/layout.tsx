@@ -17,7 +17,11 @@ export default function LegalLayout({ children }: LayoutProps<"/">) {
         <Link href="/login" aria-label="Luné">
           <BrandLockup size={28} idPrefix="legal" />
         </Link>
-        <Link href="/settings" className="inline-flex min-h-11 items-center gap-1 text-xs tracking-[0.16em] text-ink-soft hover:text-white">
+        {/* 右上角疊在粉色光球上：直接放白字只有約 2.7:1，半透明玻璃也只有 4.0:1，所以墊接近不透明的深藍膠囊 */}
+        <Link
+          href="/settings"
+          className="inline-flex min-h-11 items-center gap-1 rounded-full border border-glass-line bg-sky-deep/90 pr-4 pl-2.5 text-xs tracking-[0.16em] text-white hover:underline hover:underline-offset-4"
+        >
           <Icon name="left" size={16} />
           返回
         </Link>

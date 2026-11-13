@@ -86,15 +86,16 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <section aria-label="登入或註冊" className="glass mt-5 px-5 pt-5 pb-6">
         <LoginForm canResetPassword={mailReady()} />
       </section>
-      <p className="mt-5 text-center text-[11px] leading-relaxed tracking-wider text-ink-soft">
+      {/* 卡片外直接疊在背景上：用純白字（ink-soft 在背景上只有 4.0–4.4:1） */}
+      <p className="mt-5 text-center text-[11px] leading-relaxed tracking-wider text-white">
         Luné 只協助記錄與估算，不提供醫療診斷；預測不可作為避孕依據。
         <br />
         註冊即表示同意
-        <Link href="/terms" className="mx-1 underline underline-offset-4 hover:text-white">
+        <Link href="/terms" className="mx-1 underline underline-offset-4 hover:decoration-2">
           使用條款
         </Link>
         與
-        <Link href="/privacy" className="mx-1 underline underline-offset-4 hover:text-white">
+        <Link href="/privacy" className="mx-1 underline underline-offset-4 hover:decoration-2">
           隱私權政策
         </Link>
       </p>
