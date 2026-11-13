@@ -1,4 +1,6 @@
+import { randomBytes } from "node:crypto";
 import { defineConfig, devices } from "@playwright/test";
+import webpush from "web-push";
 
 /**
  * 端對端測試：npm run test:e2e
@@ -8,6 +10,14 @@ import { defineConfig, devices } from "@playwright/test";
  * - E2E_SKIP_BUILD=1 可跳過建置（剛 build 過時）。
  */
 const PORT = 3361;
+
+// 推播金鑰與排程密鑰：每次執行隨機產生、不寫進程式碼。放進 process.env，測試 worker 會繼承同一組值
+if (!process.env.E2E_VAPID_PUBLIC_KEY || !process.env.E2E_VAPID_PRIVATE_KEY) {
+  const keys = webpush.generateVAPIDKeys();
+  process.env.E2E_VAPID_PUBLIC_KEY = keys.publicKey;
+  process.env.E2E_VAPID_PRIVATE_KEY = keys.privateKey;
+}
+process.env.E2E_CRON_SECRET ??= randomBytes(24).toString("hex");
 
 export default defineConfig({
   testDir: "e2e",
@@ -43,6 +53,10 @@ export default defineConfig({
       MAIL_PROVIDER: "log",
       GMAIL_USER: "",
       GMAIL_APP_PASSWORD: "",
+      // 打開設定頁的提醒區塊；排程路由用這組密鑰測授權
+      VAPID_PUBLIC_KEY: process.env.E2E_VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY: process.env.E2E_VAPID_PRIVATE_KEY,
+      CRON_SECRET: process.env.E2E_CRON_SECRET,
     },
   },
 });

@@ -88,6 +88,9 @@ export async function createProfile(db: Db, userId: string, input: unknown): Pro
         defaultCycleLength: v.defaultCycleLength ?? null,
         defaultPeriodLength: v.defaultPeriodLength ?? null,
         predictionEnabled: v.predictionEnabled ?? true,
+        // 沒指定就用資料表預設（開始前 2 天提醒）；null 表示不提醒
+        ...(v.remindBeforeDays !== undefined ? { remindBeforeDays: v.remindBeforeDays } : {}),
+        remindInactive: v.remindInactive ?? true,
       })
       .returning();
     return toProfile(row);
@@ -108,6 +111,8 @@ export async function updateProfile(db: Db, userId: string, profileId: unknown, 
         ...(v.defaultCycleLength !== undefined ? { defaultCycleLength: v.defaultCycleLength } : {}),
         ...(v.defaultPeriodLength !== undefined ? { defaultPeriodLength: v.defaultPeriodLength } : {}),
         ...(v.predictionEnabled !== undefined ? { predictionEnabled: v.predictionEnabled } : {}),
+        ...(v.remindBeforeDays !== undefined ? { remindBeforeDays: v.remindBeforeDays } : {}),
+        ...(v.remindInactive !== undefined ? { remindInactive: v.remindInactive } : {}),
       })
       .where(and(eq(profiles.id, current.id), eq(profiles.userId, userId)))
       .returning();

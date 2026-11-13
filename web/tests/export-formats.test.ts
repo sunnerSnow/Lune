@@ -11,6 +11,8 @@ const profile = (over: Partial<WithRecords> = {}): WithRecords => ({
   defaultCycleLength: null,
   defaultPeriodLength: null,
   predictionEnabled: true,
+  remindBeforeDays: 2,
+  remindInactive: true,
   archived: false,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",

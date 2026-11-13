@@ -39,11 +39,17 @@ async function main(): Promise<void> {
       select grantee, table_schema || '.' || table_name as table_name, string_agg(privilege_type, ', ' order by privilege_type) privs
       from information_schema.role_table_grants where table_schema in ('lune', 'auth') and grantee in ('authenticated', 'anon')
       group by 1, 2 order by 2, 1`;
-    console.log("authenticated／anon 的表權限（應只有 authenticated，且沒有 auth schema 與 rate_limits）：");
+    console.log(
+      "authenticated／anon 的表權限（應只有 authenticated，且沒有 auth schema、rate_limits、reminder_sends）：",
+    );
     for (const g of grants) console.log(`  ${g.grantee.padEnd(14)} ${g.table_name.padEnd(32)} ${g.privs}`);
     if (
       grants.some(
-        (g) => g.grantee === "anon" || g.table_name.startsWith("auth.") || g.table_name === "lune.rate_limits",
+        (g) =>
+          g.grantee === "anon" ||
+          g.table_name.startsWith("auth.") ||
+          g.table_name === "lune.rate_limits" ||
+          g.table_name === "lune.reminder_sends",
       )
     ) {
       throw new Error("權限不符預期");
@@ -52,7 +58,7 @@ async function main(): Promise<void> {
     // RLS 路徑：連線角色必須能切換成 authenticated，而且沒有身分時讀不到任何資料
     await sql.begin(async (tx) => {
       await tx.unsafe("set local role authenticated");
-      for (const table of ["lune.profiles", "lune.periods", "lune.daily_logs"]) {
+      for (const table of ["lune.profiles", "lune.periods", "lune.daily_logs", "lune.push_subscriptions"]) {
         const [{ n }] = await tx.unsafe<{ n: number }[]>(`select count(*)::int n from ${table}`);
         if (n !== 0) throw new Error(`切成 authenticated 後仍讀到 ${table} 的 ${n} 筆資料（RLS 沒生效）`);
       }

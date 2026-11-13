@@ -6,10 +6,11 @@ import { DeleteAccount } from "@/components/settings/delete-account";
 import { EmailVerification } from "@/components/settings/email-verification";
 import { IcsExport } from "@/components/settings/ics-export";
 import { ProfileManager } from "@/components/settings/profile-manager";
+import { ReminderSettings } from "@/components/settings/reminder-settings";
 import { Icon } from "@/components/ui/icon";
 import { PageTitle } from "@/components/ui/page-title";
 import { requireUser } from "@/lib/auth/session";
-import { mailReady } from "@/lib/config";
+import { mailReady, pushEnv, pushReady } from "@/lib/config";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { computeCycleSummary } from "@/lib/cycle/cycle-predictor";
 import { getDb } from "@/lib/db/client";
@@ -28,6 +29,8 @@ export default async function SettingsPage() {
     getToday(),
   ]);
   const { prediction } = computeCycleSummary(await listPeriods(db, user.id, profile.id), profile, today);
+  // 推播沒設定（或設定錯誤）時不顯示提醒區塊
+  const pushPublicKey = pushReady() ? (pushEnv()?.publicKey ?? null) : null;
 
   return (
     <div>
@@ -69,6 +72,22 @@ export default async function SettingsPage() {
         </div>
 
         <div className="flex flex-col gap-6">
+          {pushPublicKey && (
+            <section aria-labelledby="reminders-title" className="glass px-5 pt-4 pb-4">
+              <SectionTitle id="reminders-title" en="REMINDERS" tc="提醒" />
+              <ReminderSettings
+                publicKey={pushPublicKey}
+                profile={{
+                  id: profile.id,
+                  displayName: profile.displayName,
+                  remindBeforeDays: profile.remindBeforeDays,
+                  remindInactive: profile.remindInactive,
+                  predictionEnabled: profile.predictionEnabled,
+                }}
+              />
+            </section>
+          )}
+
           <section aria-labelledby="account-title" className="glass px-5 pt-4 pb-3">
             <SectionTitle id="account-title" en="ACCOUNT" tc="帳號" />
             <p className="flex items-center justify-between gap-3 border-t border-line py-3 text-sm tracking-wider">

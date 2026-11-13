@@ -114,3 +114,58 @@ export function mailReady(): boolean {
 export function requireEmailVerification(): boolean {
   return process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === "1" && !isLocalMode() && mailReady();
 }
+
+export interface PushEnv {
+  /** VAPID 公鑰（URL-safe base64，65 bytes）：瀏覽器訂閱時要用，可以公開 */
+  publicKey: string;
+  /** VAPID 私鑰（32 bytes）：只在伺服器簽推播請求，不能外流 */
+  privateKey: string;
+  /** VAPID 聯絡資訊（https: 網址或 mailto:）；Apple 不接受 localhost */
+  subject: string;
+}
+
+const B64URL_RE = /^[A-Za-z0-9_-]+$/;
+
+/**
+ * 推播（提醒通知）設定：VAPID_PUBLIC_KEY＋VAPID_PRIVATE_KEY 都設了才開放；沒設回 null（設定頁不顯示提醒）。
+ * 金鑰格式不對直接丟錯，避免部署後才在排程裡默默失敗。
+ */
+export function pushEnv(): PushEnv | null {
+  const publicKey = process.env.VAPID_PUBLIC_KEY?.trim() || "";
+  const privateKey = process.env.VAPID_PRIVATE_KEY?.trim() || "";
+  if (!publicKey && !privateKey) return null;
+  if (!publicKey || !privateKey) throw new Error("VAPID_PUBLIC_KEY 與 VAPID_PRIVATE_KEY 要一起設定");
+  if (!B64URL_RE.test(publicKey) || Buffer.from(publicKey, "base64url").length !== 65) {
+    throw new Error("VAPID_PUBLIC_KEY 格式不對（應為 URL-safe base64、65 bytes）");
+  }
+  if (!B64URL_RE.test(privateKey) || Buffer.from(privateKey, "base64url").length !== 32) {
+    throw new Error("VAPID_PRIVATE_KEY 格式不對（應為 URL-safe base64、32 bytes）");
+  }
+  const origin = appOrigin();
+  const subject =
+    process.env.VAPID_SUBJECT?.trim() || (origin.startsWith("https://") ? origin : "https://lune.localhost.invalid");
+  return { publicKey, privateKey, subject };
+}
+
+/** 頁面與 Server Action 用：有沒有推播。設定錯誤只記錄一次並視為沒有，不讓設定頁整頁 500 */
+let pushConfigWarned = false;
+export function pushReady(): boolean {
+  try {
+    return pushEnv() !== null;
+  } catch (error) {
+    if (!pushConfigWarned) {
+      pushConfigWarned = true;
+      console.error(`[lune] 推播設定錯誤，提醒通知暫時關閉：${(error as Error).message}`);
+    }
+    return false;
+  }
+}
+
+/**
+ * 排程（Vercel Cron）呼叫 /api/cron/reminders 時帶的密鑰：Vercel 會自動送 `Authorization: Bearer <CRON_SECRET>`。
+ * 沒設或太短回 null，排程路由一律拒絕。
+ */
+export function cronSecret(): string | null {
+  const secret = process.env.CRON_SECRET?.trim() || "";
+  return secret.length >= 32 ? secret : null;
+}

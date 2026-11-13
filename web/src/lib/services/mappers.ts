@@ -15,6 +15,8 @@ export function toProfile(row: typeof profiles.$inferSelect): Profile {
     defaultCycleLength: row.defaultCycleLength ?? null,
     defaultPeriodLength: row.defaultPeriodLength ?? null,
     predictionEnabled: row.predictionEnabled,
+    remindBeforeDays: row.remindBeforeDays ?? null,
+    remindInactive: row.remindInactive,
     archived: row.archivedAt !== null,
     createdAt: iso(row.createdAt),
     updatedAt: iso(row.updatedAt),

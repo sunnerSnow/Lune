@@ -38,7 +38,7 @@ npm run dev          # http://localhost:3000
 
 | 指令 | 用途 |
 | --- | --- |
-| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離、限流、匯出、刪除帳號、Email 驗證與重設密碼） |
+| `npm test` | Vitest：純函式＋PGlite 整合測試（含 RLS 隔離、限流、匯出、刪除帳號、Email 驗證與重設密碼、提醒排程） |
 | `npm run test:e2e` | Playwright：先建置，再以本機示範模式（記憶體 PGlite）跑手機＋桌面的端對端測試；用電腦上的 Chrome。剛建置過可設 `E2E_SKIP_BUILD=1` 跳過建置 |
 | `npm run typecheck` | 產生路由型別後跑 tsc |
 | `npm run lint` | ESLint |
@@ -60,6 +60,8 @@ npm run dev          # http://localhost:3000
   - `GMAIL_APP_PASSWORD` 是 Google 帳號的「應用程式密碼」，不是登入密碼；要先開啟兩步驟驗證才能建立。
   - `next dev` 沒設 `MAIL_PROVIDER` 時用 `log`：不寄信，把整封信印在終端機。部署環境不允許 `log`。
 - `AUTH_REQUIRE_EMAIL_VERIFICATION=1`（選填）：註冊後要先驗證 Email 才能登入。預設關閉：註冊直接登入，同時寄一封驗證信，設定頁可以重寄。
+- `VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`：提醒通知（Web Push）的金鑰，用 `cd web && npx web-push generate-vapid-keys` 產生。沒設時設定頁不顯示「提醒」。金鑰換掉後，所有裝置都要重新開啟通知。
+- `CRON_SECRET`：每天排程呼叫 `/api/cron/reminders` 用的密鑰，至少 32 個字元。Vercel 設了這個變數後，排程會自動帶上。
 
 部署在 Vercel 時，沒有 `DATABASE_URL` 會直接報錯；就算設了 `LUNE_LOCAL_MODE`，也不會進入本機示範模式。示範模式有寫死密碼的帳號，不能出現在公開網站。
 
@@ -81,6 +83,10 @@ npm run dev          # http://localhost:3000
   | `GMAIL_USER` | 寄件的 Gmail 地址 |
   | `GMAIL_APP_PASSWORD` | 這個 Gmail 的應用程式密碼（16 個字母，有沒有空白都可以） |
   | `AUTH_REQUIRE_EMAIL_VERIFICATION` | 選填，`1` 表示要先驗證 Email 才能登入 |
+  | `VAPID_PUBLIC_KEY`／`VAPID_PRIVATE_KEY` | 提醒通知的金鑰 |
+  | `CRON_SECRET` | 排程密鑰，至少 32 個字元 |
+
+  - **排程**：`web/vercel.json` 設定每天 UTC 01:00（台灣時間早上 9 點）呼叫 `/api/cron/reminders`。Vercel 免費方案只保證在那一個小時內執行。
 
   - **Preview 不要填正式資料庫的連線字串**：不然任何預覽網址都能讀寫正式使用者的健康紀錄。沒設資料庫時，Preview 部署可以建置，但頁面會直接報錯。需要預覽時，另外開一個 Neon branch，給 Preview 用它的連線字串和一組不同的密鑰。
   - 不要設 `LUNE_LOCAL_MODE`。`DATABASE_URL_UNPOOLED` 只有本機跑 migration 時用得到。
@@ -90,7 +96,7 @@ npm run dev          # http://localhost:3000
 - **Next.js 16.4（App Router）＋ TypeScript ＋ Tailwind CSS 4**；`cacheComponents` 關閉（全是個人即時資料）
 - **Neon Postgres ＋ Drizzle**；本機與測試用 **PGlite**（同一份 migration，含 RLS 與 `btree_gist`）
 - **Better Auth**（Email＋密碼）：使用者表在 `auth` schema；沒有對外的 `/api/auth`，登入／註冊／登出都走 Server Action，並用資料庫計數限流
-- 資料表在 `lune` schema：`profiles`、`periods`、`daily_logs`、`rate_limits`
+- 資料表在 `lune` schema：`profiles`、`periods`、`daily_logs`、`rate_limits`、`push_subscriptions`、`reminder_sends`
 - 每個伺服器查詢都經過 `withUser`：交易內切成 `authenticated` 角色並帶入使用者 ID，RLS（`user_id = auth.uid()`）是服務層之外的第二道防線
 - 目前選的 Profile 存在 `lune-profile` cookie；它只是偏好，伺服器每次都驗證歸屬
 
@@ -110,6 +116,8 @@ web/
       db/                 連線、schema、withUser
       auth/               Better Auth、session、示範使用者
       mail.ts             寄信（Gmail SMTP）、寄信額度、信件內容
+      push.ts             送推播通知（Web Push／VAPID）
+      reminders/          提醒規則（純函式）、排程授權
   tests/                  Vitest（純函式＋PGlite 整合）
   e2e/                    Playwright 端對端測試（手機＋桌面）
 ```
@@ -202,6 +210,13 @@ web/
   - 信在回應送出後才寄：帳號存不存在，回應時間都一樣。忘記密碼一律回「如果有註冊，信已寄出」。
   - 額度：同一個收件者每小時 5 封、全站每天 300 封（Gmail 個人帳號一天約 500 封上限）。
   - 重設密碼成功後，所有裝置的登入都會失效。
+- **提醒通知**（Web Push，`web/src/lib/reminders/`、`web/public/sw.js`）：
+  - 每個 Profile 各自設定：預測區間開始前 1–3 天提醒（一個週期一次）、超過 35 天沒有新增或修改紀錄時提醒（每段空窗一次）。
+  - 排程每天早上跑一次，送到這個帳號開啟通知的每台裝置；`reminder_sends` 記錄送過的提醒，重跑不會重複。全部裝置都送失敗時退回，隔天再試；失效的訂閱（404／410）會刪掉。
+  - 通知會出現在鎖定畫面，所以標題固定「Luné」，內文中性，不提經期、症狀或 Profile 名稱。點通知會切到對應的 Profile。
+  - 訂閱的網址只接受各家瀏覽器的推播服務（Google、Mozilla、Microsoft、Apple），避免伺服器被拿來打任意網址。
+  - iPhone／iPad 要先「加入主畫面」，從主畫面打開才能開啟通知（iOS 16.4 以上）。
+  - 登出不會關掉裝置的通知；要停止請在設定頁按「關閉」。
 - **已知取捨**：預設不要求驗證 Email，註冊時會告知「Email 已註冊」，有人可以藉此查出某個 Email 有沒有註冊，目前靠限流降低大量探測。設 `AUTH_REQUIRE_EMAIL_VERIFICATION=1` 後改成一律回「請收信」，已註冊的 Email 改寄通知給本人。
 - **安全標頭**（`web/next.config.ts`）：
   - `X-Frame-Options: DENY` 與 `frame-ancestors 'none'`：不能被其他網站嵌入；

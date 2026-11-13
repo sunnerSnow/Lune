@@ -33,7 +33,18 @@ const nextConfig: NextConfig = {
         ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]
         : []),
     ];
-    return [{ source: "/:path*", headers: security }];
+    return [
+      { source: "/:path*", headers: security },
+      // service worker：每次都向伺服器確認有沒有新版；只能載入同站的腳本
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
+    ];
   },
 };
 

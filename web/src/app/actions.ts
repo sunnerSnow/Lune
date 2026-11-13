@@ -6,14 +6,17 @@ import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth/better-auth";
 import { LOCAL_USERS } from "@/lib/auth/local-users";
 import { getSessionUser } from "@/lib/auth/session";
-import { isLocalMode, mailReady, requireEmailVerification } from "@/lib/config";
+import { isLocalMode, mailReady, pushReady, requireEmailVerification } from "@/lib/config";
 import { PROFILE_COOKIE, setCurrentProfileCookie } from "@/lib/current-profile";
 import { getDb } from "@/lib/db/client";
-import { AppError, type FieldIssue, unauthorized } from "@/lib/errors";
+import { AppError, type FieldIssue, issuesFromZod, unauthorized, validationFailed } from "@/lib/errors";
+import { createPushSender } from "@/lib/push";
+import { REMINDER_TEXT } from "@/lib/reminders/plan";
 import { deleteDailyLog, getDailyLog, saveDailyLog } from "@/lib/services/daily-logs";
 import { attemptAborted, attemptSucceeded, reserveAttempt } from "@/lib/services/login-guard";
 import { createPeriod, deletePeriod, endPeriod, startPeriod, updatePeriod } from "@/lib/services/periods";
 import { createProfile, resolveCurrentProfile, setProfileArchived, updateProfile } from "@/lib/services/profiles";
+import { findPushSubscription, removePushSubscription, savePushSubscription } from "@/lib/services/push-subscriptions";
 import { clientIp, consumeRateLimit } from "@/lib/services/rate-limit";
 import type { DailyLog, Period, Profile } from "@/lib/types";
 import {
@@ -24,6 +27,7 @@ import {
   type ResetPasswordInput,
   resetPasswordSchema,
 } from "@/lib/validation/auth";
+import { reminderSettingsSchema } from "@/lib/validation/push-schema";
 
 /**
  * Server Actions 都是公開的 POST 端點：每一個都自己檢查登入，輸入一律交給服務層驗證。
@@ -405,4 +409,69 @@ export async function logoutAction(): Promise<void> {
     if (!(error instanceof APIError)) logError(error);
   }
   redirect("/login");
+}
+
+// ---------------------------------------------------------------------------
+// 提醒通知（Web Push）
+// ---------------------------------------------------------------------------
+
+function requirePush(): void {
+  if (!pushReady()) throw new AppError("push_disabled", "目前還沒有開放通知", 503);
+}
+
+/** 目前 Profile 的提醒設定 */
+export async function updateReminderSettingsAction(profileId: string, input: unknown): Promise<ActionResult<Profile>> {
+  return run(async (userId) => {
+    const parsed = reminderSettingsSchema.safeParse(input);
+    if (!parsed.success) throw validationFailed(issuesFromZod(parsed.error));
+    return updateProfile(await getDb(), userId, profileId, parsed.data);
+  });
+}
+
+/** 開啟這台裝置的通知：記住瀏覽器給的推播訂閱（每位使用者每小時 20 次） */
+export async function savePushSubscriptionAction(subscription: unknown): Promise<ActionResult<null>> {
+  return run(async (userId) => {
+    requirePush();
+    const db = await getDb();
+    if (!(await consumeRateLimit(db, `push:save:${userId}`, 20, 3600))) {
+      throw new AppError("rate_limited", "操作太頻繁，請稍後再試", 429);
+    }
+    await savePushSubscription(db, userId, subscription);
+    return null;
+  });
+}
+
+/** 關掉這台裝置的通知 */
+export async function removePushSubscriptionAction(endpoint: string): Promise<ActionResult<null>> {
+  return run(async (userId) => {
+    await removePushSubscription(await getDb(), userId, endpoint);
+    return null;
+  });
+}
+
+/** 這台裝置的訂閱是不是記在目前登入的帳號底下（換過帳號登入時會是 false） */
+export async function pushDeviceStatusAction(endpoint: string): Promise<ActionResult<boolean>> {
+  return run(async (userId) => (await findPushSubscription(await getDb(), userId, endpoint)) !== null);
+}
+
+/** 送一則測試通知到這台裝置（每位使用者每小時 5 次） */
+export async function sendTestPushAction(endpoint: string): Promise<ActionResult<null>> {
+  return run(async (userId) => {
+    requirePush();
+    const db = await getDb();
+    const target = await findPushSubscription(db, userId, endpoint);
+    if (!target) throw new AppError("not_subscribed", "這台裝置還沒開啟通知", 404);
+    if (!(await consumeRateLimit(db, `push:test:${userId}`, 5, 3600))) {
+      throw new AppError("rate_limited", "測試通知一小時最多 5 次，請稍後再試", 429);
+    }
+    const sender = createPushSender();
+    if (!sender) throw new AppError("push_disabled", "目前還沒有開放通知", 503);
+    const result = await sender.send(target, { body: REMINDER_TEXT.test, url: "/settings", tag: "lune-test" });
+    if (result === "gone") {
+      await removePushSubscription(db, userId, endpoint);
+      throw new AppError("subscription_gone", "這台裝置的通知已經失效，請重新開啟", 410);
+    }
+    if (result === "failed") throw new AppError("push_failed", "通知沒有送出，請稍後再試", 502);
+    return null;
+  });
 }

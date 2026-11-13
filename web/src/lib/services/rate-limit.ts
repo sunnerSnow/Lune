@@ -1,15 +1,12 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "@/lib/db/local";
+import { rowsOf } from "@/lib/db/rows";
 import { withService } from "@/lib/db/with-user";
 
 /**
  * 固定視窗限流：同一個 key 在 windowSeconds 內最多 max 次。
  * 用資料庫（lune.rate_limits）計數，所以 serverless 多個實例共用同一份；一次 upsert 完成，不需要鎖。
  */
-
-function rowsOf<T>(result: unknown): T[] {
-  return (Array.isArray(result) ? result : ((result as { rows?: T[] }).rows ?? [])) as T[];
-}
 
 /** 計入一次並回傳是否仍在上限內（true＝允許） */
 export async function consumeRateLimit(db: Db, key: string, max: number, windowSeconds: number): Promise<boolean> {

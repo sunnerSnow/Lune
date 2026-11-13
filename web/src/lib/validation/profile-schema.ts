@@ -18,6 +18,14 @@ export const profileInputSchema = z.object({
     .max(14, "經期天數要在 1–14 天之間")
     .nullish(),
   predictionEnabled: z.boolean().optional(),
+  /** 提醒：預測區間開始前幾天（1–3）；null＝不提醒 */
+  remindBeforeDays: z
+    .number("提醒天數要是數字")
+    .int("提醒天數要是整數")
+    .min(1, "提醒天數要在 1–3 天之間")
+    .max(3, "提醒天數要在 1–3 天之間")
+    .nullish(),
+  remindInactive: z.boolean().optional(),
 });
 export type ProfileInput = z.input<typeof profileInputSchema>;
 

@@ -20,6 +20,22 @@ test.describe("未登入", () => {
 
     const exp = await request.get("/api/export", { maxRedirects: 0 });
     expect([302, 307, 401]).toContain(exp.status());
+
+    // service worker 不用登入就拿得到（瀏覽器背景更新時不一定帶 cookie）
+    const sw = await request.get("/sw.js", { maxRedirects: 0 });
+    expect(sw.status()).toBe(200);
+    expect(sw.headers()["content-type"]).toContain("javascript");
+
+    // 排程路由：沒帶密鑰 401，不是導向登入；帶對的密鑰才會跑
+    const cron = await request.get("/api/cron/reminders", { maxRedirects: 0 });
+    expect(cron.status()).toBe(401);
+    const wrong = await request.get("/api/cron/reminders", { headers: { authorization: "Bearer nope" } });
+    expect(wrong.status()).toBe(401);
+    const ok = await request.get("/api/cron/reminders", {
+      headers: { authorization: `Bearer ${process.env.E2E_CRON_SECRET}` },
+    });
+    expect(ok.status()).toBe(200);
+    expect(await ok.json()).toMatchObject({ today: todayInTaipei() });
   });
 
   test("忘記密碼不透露帳號是否存在；重設密碼與驗證 Email 的連結無效時會說明", async ({ page }) => {
@@ -191,12 +207,30 @@ test.describe("全新帳號", () => {
     await expect(sheet.getByRole("alert")).toContainText("重疊");
   });
 
-  test("重寄驗證信、新增 Profile、匯出 JSON、刪除帳號（密碼錯誤先被擋）", async ({ page }) => {
+  test("重寄驗證信、提醒設定、新增 Profile、匯出 JSON、刪除帳號（密碼錯誤先被擋）", async ({ page }) => {
     const { email, password } = await registerFresh(page, "本人");
     await page.goto("/settings");
     // e2e 的寄信是 log 模式：新帳號還沒驗證，可以重寄
     await page.getByRole("button", { name: /Email 還沒驗證/ }).click();
     await expect(page.getByRole("status").filter({ hasText: "驗證信已寄出" })).toBeVisible();
+
+    // 提醒：每個 Profile 各自設定，改了立刻存
+    const reminders = page.getByRole("region", { name: /REMINDERS/ });
+    await expect(reminders.getByText(/^這台裝置的通知/)).toBeVisible();
+    await expect(reminders.getByRole("radio", { name: "前 2 天" })).toHaveAttribute("aria-checked", "true");
+    await reminders.getByRole("radio", { name: "前 3 天" }).click();
+    await expect(reminders.getByRole("radio", { name: "前 3 天" })).toHaveAttribute("aria-checked", "true");
+    await reminders.getByRole("switch", { name: /很久沒記錄時提醒/ }).click();
+    await expect(reminders.getByRole("switch", { name: /很久沒記錄時提醒/ })).toHaveAttribute("aria-checked", "false");
+    await expect(reminders.getByRole("radio", { name: "前 3 天" })).toBeEnabled();
+    await page.reload();
+    await expect(reminders.getByRole("radio", { name: "前 3 天" })).toHaveAttribute("aria-checked", "true");
+    await expect(reminders.getByRole("switch", { name: /很久沒記錄時提醒/ })).toHaveAttribute("aria-checked", "false");
+
+    // 點通知打開的網址：不是自己的 Profile 就照原本的進首頁
+    await page.goto("/api/reminders/open?profile=00000000-0000-4000-8000-000000000000");
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.goto("/settings");
 
     await page.getByRole("button", { name: "新增 Profile" }).click();
     const sheet = page.getByRole("dialog");

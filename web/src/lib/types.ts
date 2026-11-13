@@ -35,6 +35,10 @@ export interface Profile {
   defaultCycleLength: number | null;
   defaultPeriodLength: number | null;
   predictionEnabled: boolean;
+  /** 預測區間開始前幾天提醒（1–3）；null＝不提醒 */
+  remindBeforeDays: number | null;
+  /** 超過 35 天沒有新增或修改紀錄時提醒 */
+  remindInactive: boolean;
   archived: boolean;
   createdAt: string;
   updatedAt: string;
